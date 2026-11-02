@@ -195,7 +195,7 @@ scripts/                  # Chuẩn bị/xem thông tin quản trị cục bộ
 output/Phan_tich_CLB_Agile_Scrum.md
 ```
 
-Controller nhận request và chọn View; ViewModel chỉ chứa dữ liệu cần cho form/trang; layout dùng chung cho khu vực công khai, tài khoản và Admin. Xem [thiết kế dữ liệu](docs/data-model.md) để phân biệt ràng buộc đã có với nghiệp vụ chưa triển khai.
+Controller nhận request và chọn View; ViewModel chỉ chứa dữ liệu cần cho form/trang. Khu vực công khai dùng `_Layout`; Admin dùng `_AdminLayout` với menu dọc, bao gồm trang quản lý CLB và tài khoản khi đăng nhập Admin. Xem [thiết kế dữ liệu](docs/data-model.md) và [giao diện VinhUni, nguồn hình ảnh](docs/interface-redesign.md).
 
 ## Quy ước cộng tác
 

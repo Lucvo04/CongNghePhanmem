@@ -44,7 +44,7 @@
         <header class="admin-topbar">
             <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#admin-sidebar" aria-controls="admin-sidebar" aria-label="Mở menu quản trị">☰</button>
             <div class="admin-breadcrumb"><span>Quản trị</span><span aria-hidden="true">/</span><strong>@ViewData["Title"]</strong></div>
-            <a class="admin-user" asp-area="" asp-controller="Account" asp-action="Overview"><span class="admin-avatar" aria-hidden="true">QT</span><span class="d-none d-sm-inline">Tài khoản</span></a>
+            <a class="admin-user" aria-label="Tài khoản" asp-area="" asp-controller="Account" asp-action="Overview"><span class="admin-avatar" aria-hidden="true">QT</span><span class="d-none d-sm-inline">Tài khoản</span></a>
         </header>
         <main id="main-content" class="admin-main" tabindex="-1">@RenderBody()</main>
         <footer class="admin-footer">VinhUni Clubs <span>Đồ án Công nghệ phần mềm · Không gian quản trị</span></footer>

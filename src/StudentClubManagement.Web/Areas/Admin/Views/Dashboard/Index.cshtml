@@ -1,30 +1,55 @@
-@model string
+@using StudentClubManagement.Web.Models
+@model StudentClubManagement.Web.ViewModels.Admin.DashboardViewModel
 @{
-    ViewData["Title"] = "Khu vực quản trị";
+    ViewData["Title"] = "Tổng quan";
+    string ActivityName(string action) => action switch
+    {
+        "StudentCreated" => "Cấp tài khoản sinh viên",
+        "StudentDisabled" => "Khóa tài khoản sinh viên",
+        "StudentEnabled" => "Mở lại tài khoản sinh viên",
+        "ClubCreated" => "Tạo câu lạc bộ",
+        "ClubProfileUpdated" => "Cập nhật thông tin câu lạc bộ",
+        "ClubManagerTransferred" => "Chuyển giao chủ nhiệm",
+        "PersonalProfileUpdated" => "Cập nhật hồ sơ cá nhân",
+        _ => "Cập nhật hệ thống"
+    };
 }
-<section class="container py-5">
-    <p class="eyebrow">Dành cho quản trị viên</p>
-    <h1 class="h2">Khu vực quản trị</h1>
-    <p class="text-secondary mt-3 text-break">Xin chào, @Model.</p>
-    <div class="card community-card account-details mt-4">
-        <div class="card-body p-4 p-md-5">
-            <h2 class="h4">Câu lạc bộ và chủ nhiệm</h2>
-            <p class="text-secondary">Tạo CLB, cập nhật thông tin và chuyển giao người phụ trách trong các thành viên đang hoạt động.</p>
-            <a class="btn btn-primary mt-2" asp-area="" asp-controller="ClubManagement" asp-action="Index">Quản lý câu lạc bộ</a>
+<section class="dashboard-section" aria-labelledby="dashboard-title">
+    <div class="dashboard-heading"><div><p class="eyebrow">KHÔNG GIAN ĐIỀU HÀNH</p><h1 id="dashboard-title">Tổng quan</h1><p>Xin chào, <strong>@Model.FullName</strong>. Cùng chăm sóc cộng đồng của chúng ta.</p></div><a class="btn btn-primary" asp-area="Admin" asp-controller="Clubs" asp-action="Create"><span aria-hidden="true">＋</span> Tạo câu lạc bộ</a></div>
+    <div class="dashboard-stats">
+        <article class="stat-card"><div><p>Câu lạc bộ</p><strong data-stat="clubs">@Model.ClubCount</strong><small>Tất cả trạng thái</small></div><span class="stat-symbol" aria-hidden="true">◇</span></article>
+        <article class="stat-card"><div><p>CLB đang hoạt động</p><strong data-stat="active-clubs">@Model.ActiveClubCount</strong><small>Sẵn sàng kết nối sinh viên</small></div><span class="stat-symbol green" aria-hidden="true">✓</span></article>
+        <article class="stat-card"><div><p>Tài khoản sinh viên</p><strong data-stat="students">@Model.StudentCount</strong><small>Bao gồm tài khoản bị khóa</small></div><span class="stat-symbol purple" aria-hidden="true">♙</span></article>
+        <article class="stat-card"><div><p>Lượt thành viên</p><strong data-stat="memberships">@Model.ActiveMembershipCount</strong><small>Đang tham gia tại các CLB</small></div><span class="stat-symbol amber" aria-hidden="true">◎</span></article>
+    </div>
+    <div class="dashboard-grid">
+        <div>
+            <section class="dashboard-panel" aria-labelledby="recent-clubs-title"><div class="panel-heading"><h2 id="recent-clubs-title">Câu lạc bộ mới tạo</h2><a asp-area="" asp-controller="ClubManagement" asp-action="Index">Xem tất cả ↗</a></div>
+                @if (Model.RecentClubs.Count == 0)
+                {
+                    <div class="dashboard-empty"><span aria-hidden="true">◇</span><h3>Khởi đầu một cộng đồng mới</h3><p>Chưa có câu lạc bộ trong hệ thống. Hãy cấp tài khoản sinh viên và tạo CLB đầu tiên.</p><a asp-area="Admin" asp-controller="Clubs" asp-action="Create">Tạo câu lạc bộ đầu tiên ↗</a></div>
+                }
+                else
+                {
+                    <div class="table-responsive"><table class="table dashboard-table align-middle mb-0"><thead><tr><th scope="col">Câu lạc bộ</th><th scope="col">Trạng thái</th><th scope="col"><span class="visually-hidden">Thao tác</span></th></tr></thead><tbody>
+                    @foreach (var club in Model.RecentClubs)
+                    {
+                        <tr><td><strong>@club.Name</strong><small>@club.Code</small></td><td><span class="status-pill @(club.Status == ClubStatus.Active ? "is-active" : "")">@(club.Status == ClubStatus.Active ? "Hoạt động" : club.Status == ClubStatus.Suspended ? "Tạm dừng" : "Lưu trữ")</span></td><td>@if (club.Status != ClubStatus.Archived) { <a asp-area="" asp-controller="ClubManagement" asp-action="Edit" asp-route-id="@club.Id" aria-label="Quản lý @club.Name">Quản lý ↗</a> }</td></tr>
+                    }
+                    </tbody></table></div>
+                }
+            </section>
+            <section class="dashboard-panel" aria-labelledby="quick-title"><div class="panel-heading"><h2 id="quick-title">Thao tác nhanh</h2><span class="panel-caption">Công việc thường dùng</span></div><div class="quick-actions"><a asp-area="Admin" asp-controller="Students" asp-action="Create"><span aria-hidden="true">＋</span><strong>Cấp tài khoản</strong><small>Thêm sinh viên vào hệ thống</small></a><a asp-area="" asp-controller="ClubManagement" asp-action="Index"><span aria-hidden="true">◇</span><strong>Quản lý câu lạc bộ</strong><small>Thông tin và người phụ trách</small></a><a asp-area="" asp-controller="Clubs" asp-action="Index"><span aria-hidden="true">↗</span><strong>Xem danh mục CLB</strong><small>Góc nhìn của sinh viên</small></a></div></section>
+        </div>
+        <div>
+            <section class="dashboard-panel" aria-labelledby="activity-title"><div class="panel-heading"><h2 id="activity-title">Hoạt động gần đây</h2><span class="activity-dot" aria-hidden="true"></span></div>
+                @if (Model.RecentActivity.Count == 0)
+                { <p class="empty-activity">Chưa có thao tác được ghi nhận. Các cập nhật tài khoản và CLB sẽ xuất hiện tại đây.</p> }
+                else
+                { <ol class="activity-list">@foreach (var item in Model.RecentActivity) { <li><strong>@ActivityName(item.Action)</strong><time datetime="@item.OccurredAt.ToString("O")">@item.OccurredAt.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy · HH:mm")</time></li> }</ol> }
+            </section>
+            <aside class="dashboard-note"><p>GẮN KẾT TỪ NHỮNG ĐIỀU NHỎ</p><h2>Mỗi câu lạc bộ,<br />một cộng đồng.</h2><span>Chăm chút từng hoạt động hôm nay để tạo nên trải nghiệm sinh viên đáng nhớ.</span><a asp-area="" asp-controller="Home" asp-action="Index">Ghé thăm trang chủ ↗</a></aside>
         </div>
     </div>
-    <div class="card community-card account-details mt-4">
-        <div class="card-body p-4 p-md-5">
-            <h2 class="h4">Tài khoản sinh viên</h2>
-            <p class="text-secondary">Cấp tài khoản, tìm kiếm sinh viên và khóa hoặc mở lại quyền sử dụng hệ thống.</p>
-            <a class="btn btn-primary mt-2" asp-area="Admin" asp-controller="Students" asp-action="Index">Quản lý tài khoản sinh viên</a>
-        </div>
-    </div>
-    <div class="card community-card account-details mt-4">
-        <div class="card-body p-4 p-md-5">
-            <h2 class="h4">Tài khoản quản trị của bạn</h2>
-            <p class="text-secondary">Xem thông tin tài khoản đang dùng để quản trị hệ thống.</p>
-            <a class="btn btn-primary mt-2" asp-area="" asp-controller="Account" asp-action="Overview">Xem tài khoản</a>
-        </div>
-    </div>
+    <p class="dashboard-data-note">Số liệu từ dữ liệu hệ thống tại thời điểm mở trang. Một sinh viên có thể có nhiều lượt thành viên ở các CLB khác nhau. Thời gian hiển thị theo giờ Việt Nam.</p>
 </section>

@@ -290,3 +290,47 @@ Hoàn tất kiểm tra cục bộ: 02/11/2026 (Asia/Bangkok), PB06 thuộc Sprin
 ### Review và vòng tiếp theo
 
 PB06 sẵn sàng cho review và nghiệm thu theo `docs/personal-profile.md`, chưa ghi nhận nhóm đã Review/UAT. Bước tiếp theo dự kiến PB07: gửi, rút và theo dõi đơn gia nhập; sau đó PB08 duyệt đơn. Trước khi chốt Sprint 1, nhóm cần cập nhật các phần còn lại của PB05 và phụ thuộc đơn chờ/sự kiện, không tự đánh dấu toàn Sprint Done.
+
+## Bước 9 Điều chỉnh giao diện VinhUni và khu vực quản trị
+
+Ngày hoàn tất kiểm tra cục bộ: 02/11/2026 (Asia/Bangkok). Theo yêu cầu nhóm trưởng, ưu tiên giao diện trước PB07.
+
+### Thay đổi
+
+- Trang chủ VinhUni Clubs dùng logo và bốn ảnh hoạt động lấy từ các kênh chính thức Đại học Vinh; nội dung giới thiệu được tóm tắt, có link nguồn. Lưu ảnh cục bộ, có alt, kích thước, lazy loading cho ảnh dưới màn hình đầu. Cập nhật header/footer và màu sắc chung cho các trang hiện có.
+- Tách `_AdminLayout`: sidebar tối, thu gọn desktop, offcanvas mobile, menu đánh dấu trang hiện tại, Đổi mật khẩu trực tiếp và liên kết quay lại website công khai. Không thêm menu chức năng chưa triển khai.
+- Dashboard đọc số liệu thật từ EF Core: toàn bộ CLB, CLB Active, tài khoản Student không gồm Admin, lượt Membership Active chưa kết thúc. Hiển thị 5 CLB mới tạo, 6 thao tác gần đây, lối tắt. Audit chỉ lộ tên hành động và giờ Việt Nam, không hiển thị dữ liệu chi tiết nhạy cảm.
+- Giữ MVC/Bootstrap hiện có; không cài package mới, không thay schema/migration và không tạo dữ liệu minh họa trong database ứng dụng. Nguồn ảnh, định nghĩa số liệu và hướng dẫn review: `docs/interface-redesign.md`.
+
+### Kiểm tra
+
+- **147/147 tests đạt**, 0 lỗi, 0 bỏ qua. Thêm 1 ca DashboardTests kiểm tra các trạng thái CLB, sinh viên có/không có role Admin, tài khoản khóa, một sinh viên có nhiều lượt thành viên, lượt đã kết thúc, no-store và không lộ audit payload. Giữ 146 ca kiểm thử nghiệp vụ trước đó. TRX `.local/test-results/ui-redesign.trx`, log `.local/ui-redesign-tests.log`.
+- Build Release cuối **0 warning, 0 error** (`.local/ui-redesign-build.log`). Sau bộ tests chỉ bổ sung aria-label cho liên kết tài khoản bị ẩn chữ ở mobile; đã biên dịch lại Razor thành công.
+- Browser QA trên database riêng với tài khoản/CLB giả: trang chủ, ảnh, đăng nhập/đăng xuất, dashboard, thu gọn sidebar 240→78px, mở trang đổi mật khẩu, menu điện thoại, trang sinh viên, quản lý CLB và danh mục công khai. Kiểm tra 1366×1000 và 390×844. Không phát hiện tràn ngang toàn trang hoặc ảnh lỗi; console không có warning/error. Escape đóng offcanvas; cần đợi chuyển động đóng hoàn tất trước thao tác mở lại.
+- HTTP readiness của preview trả 200 Healthy. Dữ liệu QA nhập lần đầu bị sai code page tiếng Việt của sqlcmd; đã sửa bản ghi QA bằng file UTF-8 và `-f 65001` trước chụp minh chứng, không phải lỗi hiển thị dữ liệu ứng dụng.
+- Ảnh: `.local/qa/vinh-home-preview.png`, `vinh-home-desktop.png`, `vinh-home-mobile.png`, `vinh-admin-desktop.png`, `vinh-admin-mobile.png`, `vinh-admin-mobile-menu.png`. Dashboard trong ảnh là **dữ liệu minh họa QA**, không phải dữ liệu thật của trường.
+- Đã đăng xuất tài khoản QA, đóng tab riêng, reset viewport, dừng server preview cổng 5049 và xóa đúng database `StudentClubManagement_UiQa_<guid>` do phiên này tạo sau kiểm tra tên. DB_ID sau dọn trả NULL. Không dùng tài khoản quản trị thật để lưu thử.
+
+### Review
+
+Giao diện sẵn sàng cho nhóm trưởng review theo `docs/interface-redesign.md`. Tin giới thiệu hiện là nội dung tĩnh có dẫn nguồn; chức năng quản lý sự kiện/thông báo thuộc các bước nghiệp vụ tiếp theo. PB07/PB08 và việc còn lại của PB05 giữ nguyên phạm vi, chưa đánh dấu Sprint Done hoặc UAT được nhóm chấp thuận.
+
+## Dữ liệu mẫu cho danh mục CLB — 02/11/2026
+
+Theo yêu cầu nhóm trưởng, đã thêm 6 CLB mẫu vào database ứng dụng cục bộ `StudentClubManagement` trên `.\SQLEXPRESS` (xác minh khớp User Secrets). Trước khi thêm: 0 CLB, 0 tài khoản Student, 1 Admin hoạt động.
+
+| Mã | Tên | Lĩnh vực |
+|---|---|---|
+| DEMO-CODE | Câu lạc bộ Lập trình | Học thuật |
+| DEMO-ENG | Câu lạc bộ Tiếng Anh | Ngoại ngữ |
+| DEMO-MUSIC | Câu lạc bộ Âm nhạc | Nghệ thuật |
+| DEMO-PHOTO | Câu lạc bộ Nhiếp ảnh | Nghệ thuật |
+| DEMO-SPORT | Câu lạc bộ Cầu lông | Thể thao |
+| DEMO-VOL | Câu lạc bộ Tình nguyện | Cộng đồng |
+
+- Mỗi CLB có mô tả riêng, Status Active, một Membership Manager Active và hồ sơ Student mẫu tương ứng. Hồ sơ dùng email `example.test`, mã sinh viên theo mã DEMO, họ tên ghi rõ chủ nhiệm mẫu; không có PasswordHash, external login hoặc token, không cấp mật khẩu mặc định. Vì vậy số tài khoản sinh viên và lượt thành viên trong dashboard tăng 6.
+- Mô tả ghi rõ dữ liệu minh họa phục vụ đồ án, không xác nhận đây là CLB chính thức của trường. Không chép dữ liệu QA tạm ở bước trước vào ứng dụng.
+- Script tái sử dụng `scripts/Seed-DemoClubs.sql` chỉ chạy thủ công, giới hạn đúng tên database, kiểm tra Admin dự án và role Student, ghi trong transaction có application lock, không ghi đè dữ liệu đã có. Mã CLB đã tồn tại được bỏ qua; định danh hồ sơ xung đột làm rollback. Không chỉnh tài khoản quản trị.
+- Thêm 12 audit StudentCreated/ClubCreated với lý do dữ liệu mẫu và dấu IsDemo. Chạy bằng sqlcmd `-f 65001 -b` để giữ tiếng Việt và báo lỗi đúng.
+- Xác nhận lần đầu CreatedClubs=6; lần hai CreatedClubs=0, ExistingCodesSkipped=6. Sau kiểm tra có 6 CLB Active, 6 chủ nhiệm Active, 6 hồ sơ không có mật khẩu và 12 audit, không sinh trùng.
+- Browser tại website thực `http://localhost:5026/Clubs`: danh mục hiển thị 6; tìm `lập TRÌNH` có 1 kết quả; lọc Nghệ thuật có 2; trang chi tiết Âm nhạc hiển thị đủ nội dung và xuống dòng. Không thay mã ứng dụng hoặc schema nên không cần build/migration cho bước nạp dữ liệu này.
