@@ -1,0 +1,17 @@
+@model StudentClubManagement.Web.ViewModels.Clubs.ClubProfileForm
+<p class="small text-secondary">Tên, lĩnh vực và giới thiệu sẽ hiển thị trên trang CLB công khai khi CLB đang hoạt động hoặc tạm dừng.</p>
+<div class="mb-4">
+    <label asp-for="Name" class="form-label fw-semibold"></label>
+    <input asp-for="Name" class="form-control" aria-describedby="name-error" />
+    <span asp-validation-for="Name" id="name-error" class="text-danger small"></span>
+</div>
+<div class="mb-4">
+    <label asp-for="Category" class="form-label fw-semibold"></label> <span class="small text-secondary">(tùy chọn)</span>
+    <input asp-for="Category" class="form-control" placeholder="Ví dụ: Học thuật, nghệ thuật, thể thao" aria-describedby="category-error" />
+    <span asp-validation-for="Category" id="category-error" class="text-danger small"></span>
+</div>
+<div class="mb-4">
+    <label asp-for="Description" class="form-label fw-semibold"></label> <span class="small text-secondary">(tùy chọn)</span>
+    <textarea asp-for="Description" class="form-control" rows="5" aria-describedby="description-error"></textarea>
+    <span asp-validation-for="Description" id="description-error" class="text-danger small"></span>
+</div>

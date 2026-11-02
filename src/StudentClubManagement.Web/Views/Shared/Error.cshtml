@@ -1,0 +1,14 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Không thể xử lý yêu cầu";
+}
+
+<section class="container py-5">
+    <h1 class="h2">Không thể xử lý yêu cầu lúc này</h1>
+    <p>Bạn có thể quay về trang chủ và thử lại. Nếu lỗi tiếp tục xảy ra, hãy cung cấp mã yêu cầu cho người quản trị.</p>
+    @if (Model.ShowRequestId)
+    {
+        <p>Mã yêu cầu: <code>@Model.RequestId</code></p>
+    }
+    <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Về trang chủ</a>
+</section>

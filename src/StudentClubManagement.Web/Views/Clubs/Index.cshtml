@@ -1,0 +1,91 @@
+@model StudentClubManagement.Web.ViewModels.Clubs.PublicClubListViewModel
+@{
+    ViewData["Title"] = "Khám phá câu lạc bộ";
+    ViewData["ActiveNav"] = "Clubs";
+}
+<section class="catalog-heading py-5">
+    <div class="container">
+        <p class="eyebrow">Tìm cộng đồng của bạn</p>
+        <h1 class="hero-title catalog-title">Một sở thích.<br />Nhiều người đồng hành.</h1>
+        <p class="hero-description mt-3 mb-0">Khám phá các câu lạc bộ trong trường, tìm hiểu lĩnh vực bạn yêu thích và những hoạt động mà cộng đồng hướng tới.</p>
+    </div>
+</section>
+<section class="container py-5" aria-label="Danh mục câu lạc bộ">
+    <form asp-area="" asp-controller="Clubs" asp-action="Index" method="get" class="card community-card p-4 mb-4" role="search" aria-label="Tìm câu lạc bộ">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-6">
+                <label for="search" class="form-label fw-semibold">Tên hoặc mã CLB</label>
+                <input id="search" name="search" value="@Model.Search" class="form-control" maxlength="150" placeholder="Ví dụ: Lập trình, Âm nhạc…" />
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label for="category" class="form-label fw-semibold">Lĩnh vực</label>
+                <select id="category" name="category" class="form-select">
+                    <option value="">Tất cả lĩnh vực</option>
+                    @if (!string.IsNullOrEmpty(Model.Category) && !Model.Categories.Contains(Model.Category, StringComparer.OrdinalIgnoreCase))
+                    {
+                        <option value="@Model.Category" selected>@Model.Category</option>
+                    }
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category" selected="@(string.Equals(category, Model.Category, StringComparison.OrdinalIgnoreCase))">@category</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-3 d-flex gap-2">
+                <button class="btn btn-primary text-nowrap" type="submit">Tìm kiếm</button>
+                <a class="btn btn-outline-secondary text-nowrap" asp-area="" asp-controller="Clubs" asp-action="Index">Bỏ lọc</a>
+            </div>
+        </div>
+    </form>
+    @if (Model.FilterError is not null)
+    {
+        <div class="alert alert-warning" role="alert">@Model.FilterError</div>
+    }
+    else
+    {
+        <p class="text-secondary small mb-4" role="status">@Model.TotalCount câu lạc bộ phù hợp · Trang @Model.Page / @Model.TotalPages</p>
+        @if (Model.Clubs.Count == 0)
+        {
+            <div class="card community-card p-4 p-md-5 text-center">
+                <h2 class="h4">Chưa tìm thấy câu lạc bộ phù hợp</h2>
+                <p class="mb-0">Thử từ khóa khác hoặc bỏ lọc lĩnh vực. Nếu danh mục chưa có CLB, bạn có thể quay lại sau khi nhà trường cập nhật.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var club in Model.Clubs)
+                {
+                    <div class="col-md-6 col-xl-4" data-public-club-id="@club.Id">
+                        <article class="card community-card h-100 public-club-card">
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+                                    <span class="card-index text-break">@club.Code</span>
+                                    <span class="badge @(club.Status == ClubStatus.Active ? "text-bg-success" : "text-bg-secondary")">@(club.Status == ClubStatus.Active ? "Đang hoạt động" : "Tạm dừng")</span>
+                                </div>
+                                <p class="small text-secondary mb-2 text-break">@(string.IsNullOrWhiteSpace(club.Category) ? "Chưa phân loại" : club.Category)</p>
+                                <h2 class="h4 text-break">@club.Name</h2>
+                                <p class="club-card-summary text-break mt-2 mb-4">@(string.IsNullOrWhiteSpace(club.Description) ? "Thông tin giới thiệu đang được cập nhật." : club.Description)</p>
+                                <a class="btn btn-outline-secondary align-self-start mt-auto" asp-area="" asp-controller="Clubs" asp-action="Details" asp-route-id="@club.Id" aria-label="Xem chi tiết @club.Name">Xem chi tiết →</a>
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+        }
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="d-flex flex-wrap align-items-center justify-content-end gap-3 mt-4" aria-label="Phân trang câu lạc bộ">
+                @if (Model.Page > 1)
+                {
+                    <a class="btn btn-outline-secondary" asp-action="Index" asp-route-search="@Model.Search" asp-route-category="@Model.Category" asp-route-page="@(Model.Page - 1)">Trang trước</a>
+                }
+                <span aria-current="page">@Model.Page / @Model.TotalPages</span>
+                @if (Model.Page < Model.TotalPages)
+                {
+                    <a class="btn btn-outline-secondary" asp-action="Index" asp-route-search="@Model.Search" asp-route-category="@Model.Category" asp-route-page="@(Model.Page + 1)">Trang sau</a>
+                }
+            </nav>
+        }
+    }
+</section>

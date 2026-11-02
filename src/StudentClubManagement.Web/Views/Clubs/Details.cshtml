@@ -1,0 +1,37 @@
+@model StudentClubManagement.Web.ViewModels.Clubs.PublicClubDetailsViewModel
+@{
+    ViewData["Title"] = Model.Name;
+    ViewData["ActiveNav"] = "Clubs";
+}
+<section class="container py-5">
+    <a class="d-inline-block mb-4" asp-area="" asp-controller="Clubs" asp-action="Index">← Khám phá câu lạc bộ</a>
+    <div class="row g-4 g-lg-5">
+        <div class="col-lg-8">
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                <span class="card-index text-break">@Model.Code</span>
+                <span class="badge @(Model.Status == ClubStatus.Active ? "text-bg-success" : "text-bg-secondary")">@(Model.Status == ClubStatus.Active ? "Đang hoạt động" : "Tạm dừng")</span>
+            </div>
+            <h1 class="hero-title catalog-title text-break">@Model.Name</h1>
+            <p class="text-secondary mt-3 mb-4 text-break">@(string.IsNullOrWhiteSpace(Model.Category) ? "Chưa phân loại lĩnh vực" : Model.Category)</p>
+            <div class="card community-card p-4 p-md-5">
+                <h2 class="h4 mb-3">Giới thiệu câu lạc bộ</h2>
+                <p class="club-description text-break mb-0">@(string.IsNullOrWhiteSpace(Model.Description) ? "Câu lạc bộ đang cập nhật phần giới thiệu. Bạn có thể quay lại để tìm hiểu thêm." : Model.Description)</p>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <aside class="card community-card catalog-note p-4" aria-labelledby="participation-title">
+                <p class="eyebrow mb-2">Kết nối từ sở thích</p>
+                <h2 id="participation-title" class="h4">Bạn muốn tham gia?</h2>
+                @if (Model.Status == ClubStatus.Suspended)
+                {
+                    <p class="mb-0">CLB hiện tạm dừng hoạt động và không tiếp nhận đăng ký mới. Bạn có thể khám phá các CLB khác trong danh mục.</p>
+                }
+                else
+                {
+                    <p class="mb-0">Chức năng đăng ký gia nhập trực tuyến đang được chuẩn bị. Hiện tại, bạn có thể xem thông tin và tìm CLB phù hợp với sở thích.</p>
+                }
+                <a class="btn btn-primary mt-4" asp-area="" asp-controller="Clubs" asp-action="Index">Khám phá CLB khác</a>
+            </aside>
+        </div>
+    </div>
+</section>

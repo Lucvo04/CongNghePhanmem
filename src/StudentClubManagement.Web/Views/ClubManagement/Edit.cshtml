@@ -1,0 +1,27 @@
+@model StudentClubManagement.Web.ViewModels.Clubs.EditClubViewModel
+@{ ViewData["Title"] = "Sửa thông tin CLB"; }
+<section class="container py-5">
+    <div class="account-details mx-auto">
+        <a class="d-inline-block mb-4" asp-action="Index">← CLB tôi quản lý</a>
+        <p class="eyebrow text-break">@Model.Code</p>
+        <h1 class="h2 mb-3">Sửa thông tin câu lạc bộ</h1>
+        <p class="text-secondary mb-4">Cập nhật tên, lĩnh vực và phần giới thiệu của CLB.</p>
+        <form asp-action="Edit" asp-route-id="@Model.ClubId" method="post" class="card community-card p-4 p-md-5">
+            <div asp-validation-summary="ModelOnly" class="text-danger validation-summary" role="alert"></div>
+            @if (Context.Response.StatusCode == 409)
+            {
+                <a class="btn btn-primary mt-3" asp-action="Edit" asp-route-id="@Model.ClubId">Tải lại thông tin</a>
+            }
+            else
+            {
+                <input asp-for="RowVersion" type="hidden" />
+                <partial name="_ClubProfileFields" model="Model" />
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    <button class="btn btn-primary px-4 py-2" type="submit">Lưu thông tin</button>
+                    <a class="btn btn-outline-secondary px-4 py-2" asp-action="Index">Hủy</a>
+                </div>
+            }
+        </form>
+    </div>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

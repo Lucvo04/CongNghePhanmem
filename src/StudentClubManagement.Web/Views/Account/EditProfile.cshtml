@@ -1,0 +1,53 @@
+@model StudentClubManagement.Web.ViewModels.Account.EditProfileViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+}
+<section class="container py-5">
+    <div class="account-details mx-auto">
+        <a class="d-inline-block mb-4" asp-action="Overview">← Tài khoản của tôi</a>
+        <p class="eyebrow">Thông tin của bạn</p>
+        <h1 class="h2 mb-3">Chỉnh sửa hồ sơ</h1>
+        <p class="text-secondary mb-4">Cập nhật thông tin liên hệ và học tập. Email đăng nhập, mã sinh viên và quyền hệ thống được quản lý riêng, không thay đổi tại đây.</p>
+        <div class="card community-card">
+            <div class="card-body p-4 p-md-5">
+                <form asp-area="" asp-controller="Account" asp-action="EditProfile" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger validation-summary" role="alert"></div>
+                    <input asp-for="ConcurrencyStamp" type="hidden" />
+                    <span asp-validation-for="ConcurrencyStamp" class="text-danger small"></span>
+                    <div class="mb-4">
+                        <label asp-for="FullName" class="form-label fw-semibold"></label>
+                        <input asp-for="FullName" class="form-control" autocomplete="name" maxlength="150" aria-describedby="name-error" />
+                        <span asp-validation-for="FullName" class="text-danger small" id="name-error"></span>
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="PhoneNumber" class="form-label fw-semibold"></label>
+                        <input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" maxlength="16" aria-describedby="phone-help phone-error" />
+                        <p class="form-text mb-1" id="phone-help">Không bắt buộc. Nhập 7–15 chữ số, có thể có dấu + ở đầu; không dùng khoảng trắng hoặc dấu gạch. Số này chỉ dùng liên hệ, chưa xác minh bằng SMS.</p>
+                        <span asp-validation-for="PhoneNumber" class="text-danger small" id="phone-error"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label asp-for="ClassName" class="form-label fw-semibold"></label>
+                            <input asp-for="ClassName" class="form-control" maxlength="50" aria-describedby="class-error" />
+                            <span asp-validation-for="ClassName" class="text-danger small" id="class-error"></span>
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label asp-for="Faculty" class="form-label fw-semibold"></label>
+                            <input asp-for="Faculty" class="form-control" maxlength="100" aria-describedby="faculty-error" />
+                            <span asp-validation-for="Faculty" class="text-danger small" id="faculty-error"></span>
+                        </div>
+                    </div>
+                    <p class="form-text">Lớp và khoa không bắt buộc. Thông tin hồ sơ không xuất hiện trong danh mục CLB công khai.</p>
+                    <div class="d-flex flex-column flex-sm-row flex-wrap gap-3 mt-4">
+                        <button class="btn btn-primary" type="submit">Lưu hồ sơ</button>
+                        <a class="btn btn-outline-secondary" asp-action="Overview">Hủy</a>
+                        <a class="btn btn-link" asp-action="EditProfile">Tải lại hồ sơ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

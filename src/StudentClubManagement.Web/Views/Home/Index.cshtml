@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Trang chủ";
+    const string beginningSource = "https://vpdangdoan.vinhuni.edu.vn/hoat-dong-doan-the/doan-thanh-nien-hoi-sinh-vien/seo/the-beginning-2026-khoi-dau-hanh-trinh-ket-noi-sang-tao-cua-tuoi-tre-vinhuni-146242";
+    const string clubDaySource = "https://banqlcs2.vinhuni.edu.vn/tin-tuc-su-kien/seo/tuoi-tre-truong-dai-hoc-vinh-soi-noi-ngay-hoi-cau-lac-bo-doi-nhom-va-ra-mat-cong-trinh-hang-cay-thanh-nien-tai-co-so-ii-143932";
+    const string welcomeSource = "https://hoisinhvien.vinhuni.edu.vn/tin-tuc-su-kien/seo/tuoi-tre-truong-dai-hoc-vinh-dong-hanh-ho-tro-tan-sinh-vien-khoa-67-146018";
+}
+<section class="vinh-hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 hero-copy">
+                <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span> TUỔI TRẺ VINHUNI</p>
+                <h1>Một đam mê.<br />Một cộng đồng.<br /><span>Cả thanh xuân.</span></h1>
+                <p class="hero-description">Có những điều bạn chỉ tìm thấy khi cùng nhau trải nghiệm. Tìm cộng đồng của mình, bước ra khỏi giảng đường và viết tiếp câu chuyện sinh viên.</p>
+                <div class="d-flex flex-wrap gap-3 mt-4"><a class="btn btn-primary px-4 py-3" asp-controller="Clubs" asp-action="Index">Khám phá câu lạc bộ <span aria-hidden="true">↗</span></a><a class="btn btn-hero-secondary px-3 py-3" href="#doi-song">Đời sống sinh viên <span aria-hidden="true">↓</span></a></div>
+                <div class="hero-signature"><span class="signature-dot" aria-hidden="true"></span> Cùng học hỏi. Cùng sẻ chia. Cùng trưởng thành.</div>
+            </div>
+            <div class="col-lg-6">
+                <figure class="hero-photo mb-0">
+                    <img src="~/images/vinh/community.jpg" width="1000" height="668" fetchpriority="high" alt="Sinh viên Đại học Vinh cùng tham gia hoạt động tập thể tại hội trại The Beginning 2026" />
+                    <figcaption><span class="photo-tag">KHOẢNH KHẮC VINHUNI</span><strong>Thanh xuân có nhau.</strong><a href="@beginningSource" target="_blank" rel="noopener noreferrer">The Beginning 2026 · Cổng TT Đại học Vinh ↗</a></figcaption>
+                </figure>
+                <div class="hero-photo-foot"><span>HỌC HẾT MÌNH · CHƠI HẾT SỨC</span><span aria-hidden="true">✳</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="interest-section" aria-labelledby="interest-title">
+    <div class="container">
+        <div class="section-heading"><div><p class="eyebrow">BẮT ĐẦU TỪ ĐIỀU BẠN THÍCH</p><h2 id="interest-title">Bạn muốn khám phá điều gì?</h2></div><a class="text-link" asp-controller="Clubs" asp-action="Index">Xem các câu lạc bộ <span aria-hidden="true">↗</span></a></div>
+        <div class="row g-3">
+            <div class="col-sm-6 col-lg-3"><div class="interest-card"><span class="interest-icon" aria-hidden="true">01 /</span><h3>Học thuật &amp; kỹ năng</h3><p>Thử ý tưởng mới, cùng bạn bè tiến bộ mỗi ngày.</p></div></div>
+            <div class="col-sm-6 col-lg-3"><div class="interest-card"><span class="interest-icon" aria-hidden="true">02 /</span><h3>Nghệ thuật &amp; sáng tạo</h3><p>Tìm tiếng nói riêng qua âm nhạc và những sắc màu.</p></div></div>
+            <div class="col-sm-6 col-lg-3"><div class="interest-card"><span class="interest-icon" aria-hidden="true">03 /</span><h3>Thể thao &amp; sức khỏe</h3><p>Thêm năng lượng, thêm đồng đội, thêm bứt phá.</p></div></div>
+            <div class="col-sm-6 col-lg-3"><div class="interest-card"><span class="interest-icon" aria-hidden="true">04 /</span><h3>Tình nguyện &amp; sẻ chia</h3><p>Mang sức trẻ đến những việc làm có ý nghĩa.</p></div></div>
+        </div>
+    </div>
+</section>
+<section class="student-life" id="doi-song" aria-labelledby="life-title">
+    <div class="container">
+        <div class="section-heading"><div><p class="eyebrow">NHỮNG CÂU CHUYỆN TỪ SÂN TRƯỜNG</p><h2 id="life-title">Nhịp sống VinhUni</h2></div><p class="section-note">Hoạt động được giới thiệu từ các kênh<br class="d-none d-md-block" /> thông tin chính thức của trường.</p></div>
+        <div class="row g-4">
+            <div class="col-md-4"><article class="news-card h-100"><a class="news-image" href="@beginningSource" target="_blank" rel="noopener noreferrer" aria-label="Đọc về The Beginning 2026 trên website trường"><img src="~/images/vinh/beginning.jpg" width="1000" height="668" loading="lazy" alt="Sân khấu hội trại The Beginning 2026 với chủ đề VinhUni Club's Day" /></a><div class="news-body"><div class="news-meta"><span>KẾT NỐI CÂU LẠC BỘ</span><time datetime="2026-10-12">12.10.2026</time></div><h3><a href="@beginningSource" target="_blank" rel="noopener noreferrer">The Beginning 2026: Bắt đầu hành trình cùng nhau</a></h3><p>Hội trại ngày 11/10 mang đến không gian gặp gỡ, trải nghiệm và kết nối các câu lạc bộ, đội, nhóm của sinh viên.</p><a class="news-source" href="@beginningSource" target="_blank" rel="noopener noreferrer">Nguồn: Cổng TT Đại học Vinh ↗</a></div></article></div>
+            <div class="col-md-4"><article class="news-card h-100"><a class="news-image" href="@welcomeSource" target="_blank" rel="noopener noreferrer" aria-label="Đọc về hoạt động chào tân sinh viên K67 trên website trường"><img src="~/images/vinh/welcome.jpg" width="640" height="427" loading="lazy" alt="Sinh viên tình nguyện hỗ trợ tân sinh viên Đại học Vinh làm thủ tục nhập học" /></a><div class="news-body"><div class="news-meta"><span>SỨC TRẺ TÌNH NGUYỆN</span><time datetime="2026-10-03">03.10.2026</time></div><h3><a href="@welcomeSource" target="_blank" rel="noopener noreferrer">Chào K67, chào những người bạn mới!</a></h3><p>Từ hướng dẫn nhập học đến giới thiệu các câu lạc bộ, sinh viên tình nguyện đồng hành cùng khóa 67 trong những ngày đầu đến trường.</p><a class="news-source" href="@welcomeSource" target="_blank" rel="noopener noreferrer">Nguồn: Hội Sinh viên Đại học Vinh ↗</a></div></article></div>
+            <div class="col-md-4"><article class="news-card h-100"><a class="news-image" href="@clubDaySource" target="_blank" rel="noopener noreferrer" aria-label="Đọc về ngày hội câu lạc bộ tại cơ sở II trên website trường"><img src="~/images/vinh/club-day.jpg" width="1200" height="901" loading="lazy" alt="Đoàn viên và sinh viên tham gia trồng Hàng cây Thanh niên tại cơ sở II Đại học Vinh" /></a><div class="news-body"><div class="news-meta"><span>CỘNG ĐỒNG &amp; MÔI TRƯỜNG</span><span>THÁNG 03.2026</span></div><h3><a href="@clubDaySource" target="_blank" rel="noopener noreferrer">Một ngày hội, thêm nhiều kết nối xanh</a></h3><p>Ngày hội tại cơ sở II kết hợp giao lưu câu lạc bộ, hoạt động tập thể và trồng cây, lan tỏa tinh thần gắn kết và trách nhiệm với môi trường.</p><a class="news-source" href="@clubDaySource" target="_blank" rel="noopener noreferrer">Nguồn: Cổng TT Đại học Vinh ↗</a></div></article></div>
+        </div>
+    </div>
+</section>
+<section class="about-vinh" id="gioi-thieu" aria-labelledby="about-title">
+    <div class="container"><div class="about-panel"><div class="about-emblem"><img src="~/images/vinh/logo.png" width="140" height="140" loading="lazy" alt="Biểu trưng Đại học Vinh" /><span>TỪ NĂM 1959</span></div><div><p class="eyebrow">TỰ HÀO LÀ SINH VIÊN ĐẠI HỌC VINH</p><h2 id="about-title">Nơi học tập mở ra.<br />Nơi cộng đồng lớn lên.</h2><p>Được thành lập năm 1959, Trường Đại học Vinh là nơi nhiều thế hệ sinh viên học tập và trưởng thành. Những hoạt động ngoài giảng đường giúp mỗi người tìm thấy bạn bè, rèn kỹ năng và đóng góp cho cộng đồng.</p><a class="text-link" href="https://tuyensinh.vinhuni.edu.vn/gioi-thieu/seo/khai-quat-ve-truong-dai-hoc-vinh-61489" target="_blank" rel="noopener noreferrer">Tìm hiểu về Trường Đại học Vinh ↗</a></div></div></div>
+</section>

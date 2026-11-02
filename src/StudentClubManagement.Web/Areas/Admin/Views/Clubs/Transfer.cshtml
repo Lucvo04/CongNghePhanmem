@@ -1,0 +1,49 @@
+@model StudentClubManagement.Web.ViewModels.Clubs.TransferManagerViewModel
+@{ ViewData["Title"] = "Chuyển giao chủ nhiệm"; }
+<section class="container py-5">
+    <div class="account-details mx-auto">
+        <a class="d-inline-block mb-4" asp-area="" asp-controller="ClubManagement" asp-action="Index">← Quản lý câu lạc bộ</a>
+        <p class="eyebrow">Phân công người phụ trách</p>
+        <h1 class="h2 mb-4">Chuyển giao chủ nhiệm</h1>
+        <div class="card community-card p-4 p-md-5">
+            <h2 class="h4 text-break">@Model.Club!.Name</h2>
+            <p class="text-secondary text-break">Mã CLB: @Model.Club.Code</p>
+            <p class="text-break">Chủ nhiệm hiện tại: <strong>@Model.Club.ManagerName</strong> (@Model.Club.ManagerCode)</p>
+            <p class="text-secondary">Chỉ chọn thành viên đang hoạt động của CLB và có tài khoản đang hoạt động. Người cũ vẫn là thành viên, nhưng mất quyền quản lý ngay sau khi chuyển giao.</p>
+            <form asp-action="Transfer" asp-route-id="@Model.Club.Id" method="post">
+                <div asp-validation-summary="All" class="text-danger validation-summary" role="alert"></div>
+                @if (Context.Response.StatusCode == 409)
+                {
+                    <a class="btn btn-primary mt-3" asp-action="Transfer" asp-route-id="@Model.Club.Id">Tải lại thông tin</a>
+                }
+                else if (Model.Candidates.Count == 0)
+                {
+                    <div class="alert alert-info mb-0" role="status">Chưa có thành viên khác đủ điều kiện nhận chuyển giao. Cần có thêm thành viên hoạt động trong CLB trước khi thực hiện.</div>
+                }
+                else
+                {
+                    <input asp-for="RowVersion" type="hidden" />
+                    <div class="mb-4">
+                        <label asp-for="NewManagerUserId" class="form-label fw-semibold"></label>
+                        <select asp-for="NewManagerUserId" class="form-select">
+                            <option value="">Chọn thành viên</option>
+                            @foreach (var candidate in Model.Candidates)
+                            {
+                                <option value="@candidate.UserId">@candidate.StudentCode — @candidate.FullName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="Reason" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Reason" class="form-control" rows="3" maxlength="500"></textarea>
+                    </div>
+                    <div class="d-flex flex-column flex-sm-row gap-3">
+                        <button class="btn btn-primary px-4 py-2" type="submit">Xác nhận chuyển chủ nhiệm</button>
+                        <a class="btn btn-outline-secondary px-4 py-2" asp-area="" asp-controller="ClubManagement" asp-action="Index">Hủy</a>
+                    </div>
+                }
+            </form>
+        </div>
+    </div>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

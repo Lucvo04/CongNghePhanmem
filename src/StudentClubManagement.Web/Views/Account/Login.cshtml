@@ -1,0 +1,51 @@
+@model StudentClubManagement.Web.ViewModels.Account.LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+<section class="account-section">
+    <div class="container py-5">
+        <div class="row g-4 g-lg-5 align-items-center">
+            <div class="col-lg-6 account-intro">
+                <p class="eyebrow">Cộng đồng của bạn</p>
+                <h1 class="account-title">Chào mừng<br />bạn trở lại.</h1>
+                <p class="hero-description mt-4 d-none d-lg-block">Một nơi để kết nối, cùng tham gia và tạo nên những hoạt động có ý nghĩa.</p>
+                <p class="text-secondary mt-4 mb-0 d-none d-lg-block">Sử dụng tài khoản được cấp để truy cập không gian của bạn.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="card community-card account-card shadow-sm mx-auto me-lg-0">
+                    <div class="card-body p-4 p-md-5">
+                        <h2 class="h3 mb-2">Đăng nhập tài khoản</h2>
+                        <p class="text-secondary mb-4">Nhập email và mật khẩu để tiếp tục.</p>
+                        @if (TempData["AccountNotice"] is string notice)
+                        {
+                            <div class="alert alert-warning" role="alert">@notice</div>
+                        }
+                        <form asp-area="" asp-controller="Account" asp-action="Login" method="post">
+                            <input asp-for="ReturnUrl" type="hidden" />
+                            <div asp-validation-summary="ModelOnly" class="text-danger validation-summary" role="alert"></div>
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label fw-semibold"></label>
+                                <input asp-for="Email" class="form-control form-control-lg" autocomplete="username" inputmode="email" aria-describedby="email-error" />
+                                <span asp-validation-for="Email" class="text-danger small" id="email-error"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label fw-semibold"></label>
+                                <input asp-for="Password" class="form-control form-control-lg" autocomplete="current-password" aria-describedby="password-error" />
+                                <span asp-validation-for="Password" class="text-danger small" id="password-error"></span>
+                            </div>
+                            <div class="form-check my-4">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                <label asp-for="RememberMe" class="form-check-label"></label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-3">Đăng nhập</button>
+                        </form>
+                        <p class="small text-secondary mt-4 mb-0">Chưa có tài khoản hoặc quên mật khẩu? Liên hệ quản trị viên để được hỗ trợ.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

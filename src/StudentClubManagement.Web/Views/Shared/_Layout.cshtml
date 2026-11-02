@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="VinhUni Clubs — Khám phá câu lạc bộ, kết nối đam mê và tìm hiểu đời sống sinh viên Trường Đại học Vinh. Website đồ án học phần." />
+    <title>@ViewData["Title"] | VinhUni Clubs</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Chuyển đến nội dung chính</a>
+    <div class="university-strip"><div class="container"><span>TRƯỜNG ĐẠI HỌC VINH <span class="d-none d-md-inline">· CỘNG ĐỒNG SINH VIÊN</span></span><a href="https://vinhuni.edu.vn/pages/" target="_blank" rel="noopener noreferrer">Cổng thông tin trường ↗</a></div></div>
+    <header class="site-header">
+        <nav class="navbar navbar-expand-xl" aria-label="Điều hướng chính">
+            <div class="container py-2">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/vinh/logo.png" width="52" height="52" alt="Biểu trưng Trường Đại học Vinh" />
+                    <span class="brand-wordmark">VinhUni <span>Clubs</span><small>CÂU LẠC BỘ SINH VIÊN</small></span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navigation"
+                        aria-controls="main-navigation" aria-expanded="false" aria-label="Mở hoặc đóng menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="main-navigation">
+                    <ul class="navbar-nav ms-auto gap-lg-3">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Clubs" asp-action="Index" aria-current="@(ViewData["ActiveNav"] as string == "Clubs" ? "page" : null)">Câu lạc bộ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="gioi-thieu">Giới thiệu</a>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            @if (User.IsInRole(StudentClubManagement.Web.Security.SystemRoles.Admin))
+                            {
+                                <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Quản trị</a></li>
+                            }
+                            else
+                            {
+                                <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="ClubManagement" asp-action="Index">CLB tôi quản lý</a></li>
+                            }
+                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Account" asp-action="Overview">Tài khoản</a></li>
+                            <li class="nav-item">
+                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                    <button class="nav-link nav-logout" type="submit">Đăng xuất</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">Đăng nhập</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main id="main-content" tabindex="-1">
+        @RenderBody()
+    </main>
+    <footer class="site-footer mt-auto">
+        <div class="container py-5">
+            <div class="row g-4">
+                <div class="col-lg-6"><p class="footer-brand">VinhUni Clubs</p><p class="mb-2">Kết nối đam mê. Cùng nhau trưởng thành.</p><p class="footer-note mb-0">Trường Đại học Vinh · 182 Lê Duẩn,<br />Phường Trường Vinh, Tỉnh Nghệ An.</p></div>
+                <div class="col-sm-6 col-lg-3"><h2 class="h6">KHÁM PHÁ</h2><a asp-area="" asp-controller="Clubs" asp-action="Index">Danh mục câu lạc bộ</a><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="doi-song">Đời sống sinh viên</a><a asp-area="" asp-controller="Account" asp-action="Login">Không gian của bạn</a></div>
+                <div class="col-sm-6 col-lg-3"><h2 class="h6">KẾT NỐI VỚI TRƯỜNG</h2><a href="https://vinhuni.edu.vn/pages/" target="_blank" rel="noopener noreferrer">Cổng thông tin Đại học Vinh ↗</a><a href="https://hoisinhvien.vinhuni.edu.vn/" target="_blank" rel="noopener noreferrer">Hội Sinh viên Trường ↗</a></div>
+            </div>
+            <div class="footer-bottom">Đồ án học phần Công nghệ phần mềm. Hình ảnh và nội dung tham khảo: Cổng TT Đại học Vinh. Đây không phải website chính thức của trường.</div>
+        </div>
+    </footer>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

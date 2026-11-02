@@ -1,0 +1,56 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var clubs = controller is "Clubs" or "ClubManagement";
+    var account = controller == "Account" && action != "ChangePassword";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] | Quản trị VinhUni Clubs</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="admin-body">
+    <a class="skip-link" href="#main-content">Chuyển đến nội dung chính</a>
+    <aside class="offcanvas-lg offcanvas-start admin-sidebar" tabindex="-1" id="admin-sidebar" aria-labelledby="admin-brand">
+        <div class="admin-brand">
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" aria-label="VinhUni Clubs — Tổng quan quản trị">
+                <img src="~/images/vinh/logo.png" alt="" width="42" height="42" />
+                <span class="nav-label"><strong id="admin-brand">VinhUni Clubs</strong><small>KHÔNG GIAN QUẢN TRỊ</small></span>
+            </a>
+            <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#admin-sidebar" aria-label="Đóng menu quản trị"></button>
+        </div>
+        <nav class="admin-navigation" aria-label="Điều hướng quản trị">
+            <p class="nav-group nav-label">ĐIỀU HÀNH</p>
+            <a class="admin-nav-link @(controller == "Dashboard" ? "active" : "")" aria-current="@(controller == "Dashboard" ? "page" : null)" aria-label="Tổng quan" title="Tổng quan" asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><span class="nav-symbol" aria-hidden="true">▦</span><span class="nav-label">Tổng quan</span></a>
+            <a class="admin-nav-link @(controller == "Students" ? "active" : "")" aria-current="@(controller == "Students" ? "page" : null)" aria-label="Tài khoản sinh viên" title="Tài khoản sinh viên" asp-area="Admin" asp-controller="Students" asp-action="Index"><span class="nav-symbol" aria-hidden="true">♙</span><span class="nav-label">Tài khoản sinh viên</span></a>
+            <a class="admin-nav-link @(clubs ? "active" : "")" aria-current="@(clubs ? "page" : null)" aria-label="Quản lý câu lạc bộ" title="Quản lý câu lạc bộ" asp-area="" asp-controller="ClubManagement" asp-action="Index"><span class="nav-symbol" aria-hidden="true">◇</span><span class="nav-label">Quản lý câu lạc bộ</span></a>
+            <p class="nav-group nav-label">CÁ NHÂN</p>
+            <a class="admin-nav-link @(account ? "active" : "")" aria-current="@(account ? "page" : null)" aria-label="Tài khoản của tôi" title="Tài khoản của tôi" asp-area="" asp-controller="Account" asp-action="Overview"><span class="nav-symbol" aria-hidden="true">◎</span><span class="nav-label">Tài khoản của tôi</span></a>
+            <a class="admin-nav-link @(controller == "Account" && action == "ChangePassword" ? "active" : "")" aria-current="@(controller == "Account" && action == "ChangePassword" ? "page" : null)" aria-label="Đổi mật khẩu" title="Đổi mật khẩu" asp-area="" asp-controller="Account" asp-action="ChangePassword"><span class="nav-symbol" aria-hidden="true">⚿</span><span class="nav-label">Đổi mật khẩu</span></a>
+            <p class="nav-group nav-label">WEBSITE</p>
+            <a class="admin-nav-link" aria-label="Xem trang công khai" title="Xem trang công khai" asp-area="" asp-controller="Home" asp-action="Index"><span class="nav-symbol" aria-hidden="true">↗</span><span class="nav-label">Xem trang công khai</span></a>
+        </nav>
+        <div class="admin-sidebar-bottom">
+            <button type="button" class="admin-nav-link d-none d-lg-flex w-100" id="admin-collapse" aria-controls="admin-sidebar" aria-expanded="true" aria-label="Thu gọn menu" title="Thu gọn menu"><span class="nav-symbol" aria-hidden="true">⇤</span><span class="nav-label">Thu gọn menu</span></button>
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post"><button class="admin-nav-link w-100" type="submit" aria-label="Đăng xuất" title="Đăng xuất"><span class="nav-symbol" aria-hidden="true">↪</span><span class="nav-label">Đăng xuất</span></button></form>
+        </div>
+    </aside>
+    <div class="admin-workspace">
+        <header class="admin-topbar">
+            <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#admin-sidebar" aria-controls="admin-sidebar" aria-label="Mở menu quản trị">☰</button>
+            <div class="admin-breadcrumb"><span>Quản trị</span><span aria-hidden="true">/</span><strong>@ViewData["Title"]</strong></div>
+            <a class="admin-user" asp-area="" asp-controller="Account" asp-action="Overview"><span class="admin-avatar" aria-hidden="true">QT</span><span class="d-none d-sm-inline">Tài khoản</span></a>
+        </header>
+        <main id="main-content" class="admin-main" tabindex="-1">@RenderBody()</main>
+        <footer class="admin-footer">VinhUni Clubs <span>Đồ án Công nghệ phần mềm · Không gian quản trị</span></footer>
+    </div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

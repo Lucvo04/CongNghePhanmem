@@ -1,0 +1,76 @@
+@model StudentClubManagement.Web.ViewModels.Clubs.ClubListViewModel
+@using StudentClubManagement.Web.Models
+@{
+    ViewData["Title"] = Model.IsAdmin ? "Quản lý câu lạc bộ" : "CLB tôi quản lý";
+}
+<section class="container py-5">
+    @if (Model.IsAdmin)
+    {
+        <a class="d-inline-block mb-4" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">← Khu vực quản trị</a>
+    }
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <p class="eyebrow">Không gian điều hành</p>
+            <h1 class="h2">@ViewData["Title"]</h1>
+            <p class="text-secondary mb-0">@(Model.IsAdmin ? "Tạo câu lạc bộ, cập nhật hồ sơ và phân công người phụ trách." : "Cập nhật thông tin những câu lạc bộ bạn đang phụ trách.")</p>
+        </div>
+        @if (Model.IsAdmin)
+        {
+            <a class="btn btn-primary px-4 py-2 flex-shrink-0" asp-area="Admin" asp-controller="Clubs" asp-action="Create">Tạo câu lạc bộ</a>
+        }
+    </div>
+    @if (TempData["ClubMessage"] is string message)
+    {
+        <div class="alert alert-success" role="status">@message</div>
+    }
+    <form asp-action="Index" method="get" class="card community-card p-4 mb-4">
+        <label for="search" class="form-label fw-semibold">Tìm theo tên hoặc mã CLB</label>
+        <div class="d-flex flex-column flex-sm-row gap-2">
+            <input id="search" name="search" value="@Model.Search" class="form-control" maxlength="150" />
+            <button type="submit" class="btn btn-primary text-nowrap">Tìm kiếm</button>
+            <a class="btn btn-outline-secondary text-nowrap" asp-action="Index">Bỏ lọc</a>
+        </div>
+    </form>
+    <p class="small text-secondary">@Model.TotalCount câu lạc bộ · Trang @Model.Page / @Model.TotalPages</p>
+    @if (Model.Clubs.Count == 0)
+    {
+        <div class="card community-card p-4 p-md-5 text-center">
+            <h2 class="h4">Chưa có câu lạc bộ phù hợp</h2>
+            <p class="mb-0">@(Model.IsAdmin ? "Thử đổi từ khóa hoặc tạo CLB mới sau khi đã cấp tài khoản sinh viên cho chủ nhiệm." : "Khi được phân công làm chủ nhiệm, CLB sẽ xuất hiện tại đây. Bạn cũng có thể thử bỏ từ khóa tìm kiếm.")</p>
+        </div>
+    }
+    <div class="row g-4">
+        @foreach (var club in Model.Clubs)
+        {
+            <div class="col-md-6 col-xl-4" data-club-id="@club.Id">
+                <article class="card community-card h-100">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 mb-3"><span class="card-index text-break">@club.Code</span><span class="small text-secondary">@(club.Status == ClubStatus.Active ? "Đang hoạt động" : club.Status == ClubStatus.Suspended ? "Tạm dừng" : "Đã lưu trữ")</span></div>
+                        <h2 class="h4 text-break">@club.Name</h2>
+                        <p class="text-break">@(club.Category ?? "Chưa có lĩnh vực")</p>
+                        <dl class="mb-4"><dt class="small text-secondary">Chủ nhiệm</dt><dd class="text-break mb-0">@(club.ManagerName ?? "Chưa có người phụ trách")</dd><dd class="small text-secondary text-break">@club.ManagerCode</dd></dl>
+                        @if (club.Status != ClubStatus.Archived)
+                        {
+                            <div class="d-flex flex-wrap gap-2 mt-auto">
+                                <a class="btn btn-outline-secondary" asp-area="" asp-controller="Clubs" asp-action="Details" asp-route-id="@club.Id">Xem công khai</a>
+                                <a class="btn btn-primary" asp-action="Edit" asp-route-id="@club.Id">Sửa thông tin</a>
+                                @if (Model.IsAdmin)
+                                {
+                                    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Clubs" asp-action="Transfer" asp-route-id="@club.Id">Chuyển chủ nhiệm</a>
+                                }
+                            </div>
+                        }
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="d-flex justify-content-end gap-3 align-items-center mt-4" aria-label="Phân trang CLB">
+            @if (Model.Page > 1) { <a class="btn btn-outline-secondary" asp-action="Index" asp-route-search="@Model.Search" asp-route-page="@(Model.Page - 1)">Trang trước</a> }
+            <span aria-current="page">@Model.Page / @Model.TotalPages</span>
+            @if (Model.Page < Model.TotalPages) { <a class="btn btn-outline-secondary" asp-action="Index" asp-route-search="@Model.Search" asp-route-page="@(Model.Page + 1)">Trang sau</a> }
+        </nav>
+    }
+</section>

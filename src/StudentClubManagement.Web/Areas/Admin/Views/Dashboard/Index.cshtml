@@ -1,0 +1,30 @@
+@model string
+@{
+    ViewData["Title"] = "Khu vực quản trị";
+}
+<section class="container py-5">
+    <p class="eyebrow">Dành cho quản trị viên</p>
+    <h1 class="h2">Khu vực quản trị</h1>
+    <p class="text-secondary mt-3 text-break">Xin chào, @Model.</p>
+    <div class="card community-card account-details mt-4">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="h4">Câu lạc bộ và chủ nhiệm</h2>
+            <p class="text-secondary">Tạo CLB, cập nhật thông tin và chuyển giao người phụ trách trong các thành viên đang hoạt động.</p>
+            <a class="btn btn-primary mt-2" asp-area="" asp-controller="ClubManagement" asp-action="Index">Quản lý câu lạc bộ</a>
+        </div>
+    </div>
+    <div class="card community-card account-details mt-4">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="h4">Tài khoản sinh viên</h2>
+            <p class="text-secondary">Cấp tài khoản, tìm kiếm sinh viên và khóa hoặc mở lại quyền sử dụng hệ thống.</p>
+            <a class="btn btn-primary mt-2" asp-area="Admin" asp-controller="Students" asp-action="Index">Quản lý tài khoản sinh viên</a>
+        </div>
+    </div>
+    <div class="card community-card account-details mt-4">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="h4">Tài khoản quản trị của bạn</h2>
+            <p class="text-secondary">Xem thông tin tài khoản đang dùng để quản trị hệ thống.</p>
+            <a class="btn btn-primary mt-2" asp-area="" asp-controller="Account" asp-action="Overview">Xem tài khoản</a>
+        </div>
+    </div>
+</section>

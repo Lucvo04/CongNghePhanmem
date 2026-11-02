@@ -1,0 +1,25 @@
+# .NET build outputs
+**/bin/
+**/obj/
+TestResults/
+*.user
+*.suo
+.vs/
+.idea/
+
+# Local tools, caches and preview logs
+.local/
+tmp/
+
+# Machine-specific settings and credentials
+**/appsettings.Local.json
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+
+# Database files and backups
+*.mdf
+*.ldf
+*.bak

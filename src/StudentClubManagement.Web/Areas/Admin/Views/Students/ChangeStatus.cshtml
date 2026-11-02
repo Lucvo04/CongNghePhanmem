@@ -1,0 +1,52 @@
+@model StudentClubManagement.Web.ViewModels.Admin.ChangeStudentStatusViewModel
+@using StudentClubManagement.Web.Models
+@{
+    var disabling = Model.NewStatus == UserStatus.Disabled;
+    var title = disabling ? "Khóa tài khoản sinh viên" : "Mở khóa tài khoản sinh viên";
+    ViewData["Title"] = title;
+}
+<section class="container py-5">
+    <div class="account-details mx-auto">
+        <a class="d-inline-block mb-4" asp-action="Index">← Tài khoản sinh viên</a>
+        <p class="eyebrow">Xác nhận thay đổi</p>
+        <h1 class="h2 mb-4">@title</h1>
+        <div class="card community-card">
+            <div class="card-body p-4 p-md-5">
+                <dl class="row mb-4">
+                    <dt class="col-sm-4">Sinh viên</dt><dd class="col-sm-8 text-break">@Model.Student!.FullName</dd>
+                    <dt class="col-sm-4">Mã sinh viên</dt><dd class="col-sm-8 text-break">@Model.Student.StudentCode</dd>
+                    <dt class="col-sm-4">Email</dt><dd class="col-sm-8 text-break">@Model.Student.Email</dd>
+                </dl>
+                <p class="text-secondary">@(disabling ? "Sinh viên sẽ không thể đăng nhập; các phiên đang có sẽ dừng ở yêu cầu tiếp theo. Hồ sơ và lịch sử tham gia được giữ lại." : "Sinh viên có thể đăng nhập lại bằng mật khẩu hiện tại. Phiên cũ không được khôi phục; thời hạn tạm khóa do nhập sai mật khẩu (nếu có) vẫn được giữ.")</p>
+                <form asp-action="ChangeStatus" asp-route-id="@Model.Student.Id" method="post">
+                    @if (disabling)
+                    {
+                        <p class="small text-secondary">Nếu sinh viên đang là chủ nhiệm, cần chuyển giao các CLB đang phụ trách trước khi khóa. <a asp-area="" asp-controller="ClubManagement" asp-action="Index">Quản lý câu lạc bộ</a></p>
+                    }
+                    <div asp-validation-summary="All" class="text-danger validation-summary" role="alert"></div>
+                    @if (Context.Response.StatusCode == 409)
+                    {
+                        <a class="btn btn-primary mt-3" asp-action="ChangeStatus" asp-route-id="@Model.Student.Id">Tải lại thông tin</a>
+                    }
+                    else
+                    {
+                        <input asp-for="ConcurrencyStamp" type="hidden" />
+                        <input name="NewStatus" type="hidden" value="@((int?)Model.NewStatus)" />
+                        <div class="mb-4">
+                            <label asp-for="Reason" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Reason" class="form-control" rows="3" maxlength="500" aria-describedby="reason-guidance"></textarea>
+                            <div class="form-text" id="reason-guidance">Lý do sẽ được lưu cùng người thực hiện và thời điểm thay đổi. Không nhập mật khẩu vào đây.</div>
+                        </div>
+                        <div class="d-flex flex-column flex-sm-row gap-3">
+                            <button class="btn @(disabling ? "btn-danger" : "btn-primary") px-4 py-2" type="submit">@(disabling ? "Xác nhận khóa" : "Xác nhận mở khóa")</button>
+                            <a class="btn btn-outline-secondary px-4 py-2" asp-action="Index">Hủy</a>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

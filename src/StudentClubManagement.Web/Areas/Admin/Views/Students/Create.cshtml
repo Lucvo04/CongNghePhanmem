@@ -1,0 +1,67 @@
+@model StudentClubManagement.Web.ViewModels.Admin.CreateStudentViewModel
+@{
+    ViewData["Title"] = "Cấp tài khoản sinh viên";
+}
+<section class="container py-5">
+    <div class="account-details mx-auto">
+        <a class="d-inline-block mb-4" asp-action="Index">← Tài khoản sinh viên</a>
+        <p class="eyebrow">Thêm người dùng</p>
+        <h1 class="h2">Cấp tài khoản sinh viên</h1>
+        <p class="text-secondary mb-4">Tài khoản mới có quyền sinh viên. Lớp và khoa có thể bổ sung sau.</p>
+        <div class="card community-card">
+            <form asp-action="Create" method="post" class="card-body p-4 p-md-5">
+                <div asp-validation-summary="ModelOnly" class="text-danger validation-summary" role="alert"></div>
+                <div class="row g-4">
+                    <div class="col-md-7">
+                        <label asp-for="FullName" class="form-label fw-semibold"></label>
+                        <input asp-for="FullName" class="form-control" autocomplete="name" aria-describedby="name-error" />
+                        <span asp-validation-for="FullName" class="text-danger small" id="name-error"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="StudentCode" class="form-label fw-semibold"></label>
+                        <input asp-for="StudentCode" class="form-control" aria-describedby="code-error" />
+                        <span asp-validation-for="StudentCode" class="text-danger small" id="code-error"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="email" aria-describedby="email-guidance email-error" />
+                        <div class="form-text" id="email-guidance">Sinh viên dùng email này để đăng nhập.</div>
+                        <span asp-validation-for="Email" class="text-danger small" id="email-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ClassName" class="form-label fw-semibold"></label> <span class="small text-secondary">(tùy chọn)</span>
+                        <input asp-for="ClassName" class="form-control" aria-describedby="class-error" />
+                        <span asp-validation-for="ClassName" class="text-danger small" id="class-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Faculty" class="form-label fw-semibold"></label> <span class="small text-secondary">(tùy chọn)</span>
+                        <input asp-for="Faculty" class="form-control" aria-describedby="faculty-error" />
+                        <span asp-validation-for="Faculty" class="text-danger small" id="faculty-error"></span>
+                    </div>
+                    <div class="col-12"><hr class="mb-0" /></div>
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label fw-semibold"></label>
+                        <input asp-for="Password" class="form-control" autocomplete="new-password" aria-describedby="password-guidance password-error" />
+                        <span asp-validation-for="Password" class="text-danger small" id="password-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label fw-semibold"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" aria-describedby="confirm-error" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small" id="confirm-error"></span>
+                    </div>
+                    <div class="col-12">
+                        <p class="form-text mt-0" id="password-guidance">Ít nhất 10 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt. Ghi nhận mật khẩu để bàn giao riêng cho sinh viên; hệ thống không hiển thị lại sau khi lưu.</p>
+                        <p class="small text-secondary mb-0">Hướng dẫn sinh viên đổi mật khẩu sau lần đăng nhập đầu. Website chưa gửi thông tin qua email và chưa bắt buộc đổi mật khẩu lần đầu.</p>
+                    </div>
+                    <div class="col-12 d-flex flex-column flex-sm-row gap-3">
+                        <button class="btn btn-primary px-4 py-2" type="submit">Tạo tài khoản</button>
+                        <a class="btn btn-outline-secondary px-4 py-2" asp-action="Index">Hủy</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

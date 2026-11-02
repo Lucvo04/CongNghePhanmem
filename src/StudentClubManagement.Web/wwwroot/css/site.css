@@ -1,0 +1,320 @@
+:root {
+  --club-ink: #122d50;
+  --club-green: #0755ad;
+  --club-surface: #f0f5fb;
+  --club-border: #dce4ee;
+}
+
+html {
+  scroll-padding-top: 1.5rem;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--club-ink);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  line-height: 1.65;
+}
+
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid var(--club-border);
+}
+
+.navbar-brand {
+  color: var(--club-ink);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 0.75rem;
+  background: var(--club-green);
+  color: #fff;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.nav-link {
+  color: #42546c;
+  font-weight: 500;
+}
+
+.hero-section {
+  background: var(--club-surface);
+  padding: 2.5rem 0;
+}
+
+.eyebrow {
+  color: var(--club-green);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero-title {
+  font-size: clamp(2.35rem, 5vw, 4.25rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.035em;
+}
+
+.hero-description {
+  max-width: 35rem;
+  color: #52647a;
+  font-size: 1.13rem;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--club-green);
+  --bs-btn-border-color: var(--club-green);
+  --bs-btn-hover-bg: #06438a;
+  --bs-btn-hover-border-color: #06438a;
+  --bs-btn-active-bg: #05396f;
+  --bs-btn-active-border-color: #05396f;
+  --bs-btn-focus-shadow-rgb: 7, 85, 173;
+  border-radius: 0.6rem;
+  font-weight: 600;
+}
+
+.community-note {
+  border-left: 3px solid #87a58e;
+  padding: 1rem 0 1rem 1.75rem;
+  color: #4e625c;
+}
+
+.note-label {
+  font-size: 0.9rem;
+}
+
+.note-title {
+  color: var(--club-ink);
+  font-size: 1.65rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 1rem 0;
+}
+
+.intro-heading {
+  max-width: 48rem;
+}
+
+.intro-heading h2 {
+  font-weight: 650;
+  font-size: clamp(1.7rem, 3vw, 2.15rem);
+  line-height: 1.35;
+}
+
+.community-card {
+  border-color: var(--club-border);
+  border-radius: 0.9rem;
+  color: var(--club-ink);
+}
+
+.community-card p {
+  color: #52635d;
+}
+
+.card-index {
+  color: var(--club-green);
+  background: #edf3eb;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+
+.site-footer {
+  border-top: 1px solid var(--club-border);
+  font-size: 0.9rem;
+}
+
+.footer-note {
+  color: #52635d;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -6rem;
+  z-index: 1100;
+  padding: 0.65rem 1rem;
+  background: var(--club-ink);
+  color: #fff;
+  border-radius: 0.5rem;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+  color: #fff;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #965d13;
+  outline-offset: 4px;
+}
+
+.account-section {
+  background: var(--club-surface);
+  min-height: 72vh;
+}
+
+.account-title {
+  font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.account-card {
+  max-width: 34rem;
+}
+
+.account-details {
+  max-width: 48rem;
+}
+
+.form-control {
+  border-color: #8d9e94;
+}
+
+.validation-summary ul {
+  padding-left: 1.2rem;
+}
+
+.nav-logout {
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.student-table { min-width: 760px; }
+.student-table th { background: var(--club-surface); }
+.student-table th, .student-table td { padding: 1rem; max-width: 20rem; }
+.student-table td:first-child { min-width: 12rem; }
+.catalog-heading, .catalog-note { background: var(--club-surface); }
+.catalog-title { font-size: clamp(2rem, 4vw, 3.3rem); }
+.public-club-card { border-top: 4px solid var(--club-green); }
+.club-card-summary {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.club-description { white-space: pre-line; }
+select:focus-visible, textarea:focus-visible { outline: 3px solid #965d13; outline-offset: 4px; }
+
+@media (max-width: 575.98px) {
+  .navbar-brand {
+    font-size: 0.95rem;
+  }
+
+  .hero-section {
+    padding: 0;
+  }
+
+  .community-note {
+    padding-left: 1.25rem;
+  }
+}
+
+/* VinhUni public identity; all assets are served locally. */
+.university-strip { background: #102f54; color: #e4edfa; font-size: .68rem; letter-spacing: .065em; }
+.university-strip .container { display: flex; justify-content: space-between; gap: 1rem; padding-top: .55rem; padding-bottom: .55rem; }
+.university-strip a { color: #e4edfa; text-decoration: none; letter-spacing: 0; }
+.brand-wordmark { font-size: 1.45rem; line-height: 1.25; letter-spacing: -.04em; }
+.brand-wordmark > span { color: #0861bb; }
+.brand-wordmark small { display: block; font-size: .59rem; letter-spacing: .12em; color: #66758b; margin-top: .25rem; }
+.navbar .nav-link:hover, .navbar .nav-link[aria-current=page] { color: #0755ad; }
+.vinh-hero { padding: 4.4rem 0 3.4rem; background: linear-gradient(110deg,#f2f7fd 0%,#fff 75%); }
+.vinh-hero h1 { font-size: clamp(2.9rem,4.7vw,4.5rem); font-weight: 750; line-height: 1.12; letter-spacing: -.045em; margin-bottom: 1.5rem; }
+.vinh-hero h1 > span { color: #0755ad; }
+.vinh-hero .eyebrow { font-size: .74rem; display: flex; align-items: center; gap: .65rem; margin-bottom: 1.3rem; }
+.eyebrow-line { width: 28px; height: 2px; background: currentColor; }
+.vinh-hero .hero-description { font-size: 1rem; max-width: 29rem; line-height: 1.8; }
+.btn-hero-secondary { color: #163c68; font-weight: 600; border: 1px solid #cddcec; }
+.btn-hero-secondary:hover { background: #e6eef9; border-color: #a8bfdc; }
+.hero-signature { display: flex; align-items: center; gap: .65rem; margin-top: 2rem; font-size: .76rem; color: #63738a; }
+.signature-dot { width: 8px; height: 8px; background: #0755ad; border-radius: 50%; flex-shrink: 0; }
+.hero-photo { position: relative; overflow: hidden; border-radius: 1.1rem 1.1rem 1.1rem 3.5rem; background: #102f54; }
+.hero-photo > img { width: 100%; height: 440px; display: block; object-fit: cover; object-position: center; }
+.hero-photo figcaption { position: absolute; inset: auto 0 0; padding: 5rem 1.8rem 1.6rem; background: linear-gradient(transparent,rgba(6,25,50,.92)); color: #fff; }
+.hero-photo strong { display: block; font-size: 1.7rem; font-weight: 650; margin: .5rem 0 .2rem; }
+.photo-tag { display: inline-block; font-size: .62rem; letter-spacing: .13em; background: #f5cc61; color: #26364e; border-radius: 3px; padding: .3rem .6rem; font-weight: 700; }
+.hero-photo a { color: #e7efff; font-size: .73rem; text-decoration: none; }
+.hero-photo a:hover { text-decoration: underline; }
+.hero-photo-foot { display: flex; align-items: center; justify-content: space-between; padding: .75rem 0 0 1rem; font-size: .63rem; letter-spacing: .16em; color: #64758c; }
+.hero-photo-foot > span:last-child { font-size: 1.5rem; color: #0755ad; }
+.interest-section { padding: 3.5rem 0 4rem; }
+.section-heading { display: flex; justify-content: space-between; align-items: end; gap: 1.5rem; margin-bottom: 1.7rem; }
+.section-heading .eyebrow, .about-panel .eyebrow { font-size: .7rem; margin-bottom: .6rem; }
+.section-heading h2, .about-panel h2 { font-size: clamp(1.6rem,2.7vw,2.2rem); letter-spacing: -.035em; font-weight: 700; margin: 0; }
+.text-link { color: #0755ad; font-weight: 600; font-size: .86rem; text-decoration: none; }
+.text-link:hover { text-decoration: underline; }
+.interest-card { border: 1px solid var(--club-border); border-radius: .7rem; height: 100%; padding: 1.45rem; background: #fff; }
+.interest-icon { display: block; color: #0755ad; font-size: .8rem; font-weight: 700; margin-bottom: 1.4rem; }
+.interest-card h3 { font-size: 1.03rem; font-weight: 650; }
+.interest-card p { font-size: .87rem; color: #647389; line-height: 1.7; margin-bottom: 0; }
+.student-life { padding: 4rem 0; background: #f1f5fa; }
+.section-note { color: #647389; font-size: .84rem; margin-bottom: 0; }
+.news-card { background: #fff; border: 1px solid #e0e7f0; border-radius: .75rem; overflow: hidden; display: flex; flex-direction: column; }
+.news-image { display: block; overflow: hidden; }
+.news-image img { width: 100%; height: 210px; object-fit: cover; transition: transform .25s; }
+.news-image:hover img { transform: scale(1.025); }
+.news-body { padding: 1.4rem; flex: 1; display: flex; flex-direction: column; }
+.news-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .4rem; font-size: .59rem; font-weight: 700; color: #0755ad; margin-bottom: .9rem; letter-spacing: .035em; }
+.news-meta > :last-child { color: #697a90; }
+.news-body h3 { font-size: 1.14rem; font-weight: 650; line-height: 1.4; margin-bottom: .8rem; }
+.news-body h3 a { color: var(--club-ink); text-decoration: none; }
+.news-body h3 a:hover { color: #0755ad; }
+.news-body p { font-size: .85rem; line-height: 1.8; color: #617086; }
+.news-source { margin-top: auto; font-size: .72rem; color: #0755ad; text-decoration: none; }
+.news-source:hover { text-decoration: underline; }
+.about-vinh { padding: 4rem 0; }
+.about-panel { display: grid; grid-template-columns: 220px 1fr; gap: 3rem; align-items: center; padding: 3rem; background: #eef4fc; border-radius: 1rem; }
+.about-emblem { display: flex; align-items: center; flex-direction: column; gap: 1rem; }
+.about-emblem span { letter-spacing: .18em; font-size: .7rem; color: #526b8d; }
+.about-panel p:not(.eyebrow) { max-width: 42rem; font-size: .92rem; color: #52647a; margin: 1rem 0; }
+.site-footer { background: #102c4d; color: #f3f6fc; border: 0; }
+.site-footer .footer-brand { font-size: 1.65rem; font-weight: 700; letter-spacing: -.04em; margin-bottom: .7rem; }
+.site-footer .footer-note { color: #b4c4d9; font-size: .8rem; }
+.site-footer h2 { letter-spacing: .07em; font-size: .7rem; margin: .5rem 0 1.2rem; color: #fff; }
+.site-footer a { display: block; color: #c3d1e3; text-decoration: none; font-size: .82rem; margin-bottom: .65rem; }
+.site-footer a:hover { color: #fff; text-decoration: underline; }
+.footer-bottom { margin-top: 2.4rem; padding-top: 1.3rem; border-top: 1px solid #38506d; color: #b4c4d9; font-size: .7rem; }
+.catalog-heading { background: linear-gradient(110deg,#e9f2fe,#f7faff); border-bottom: 1px solid #dce6f2; }
+.public-club-card { box-shadow: 0 6px 18px #133e6b07; }
+.account-section { background: linear-gradient(120deg,#eaf2fc,#f8fafd); }
+.account-card { border-color: #dae4f0; }
+@media (max-width: 991.98px) {
+  .vinh-hero { padding: 2.8rem 0; }
+  .hero-photo > img { height: 380px; }
+  .about-panel { grid-template-columns: 150px 1fr; gap: 2rem; padding: 2rem; }
+}
+@media (max-width: 575.98px) {
+  .university-strip { font-size: .54rem; letter-spacing: 0; }
+  .university-strip .container { gap: .5rem; }
+  .brand-wordmark { font-size: 1.25rem; }
+  .navbar-brand img { width: 44px; height: 44px; }
+  .vinh-hero h1 { font-size: 2.8rem; }
+  .hero-photo > img { height: 340px; }
+  .hero-photo figcaption { padding: 5rem 1.4rem 1.5rem; }
+  .hero-photo a { font-size: .65rem; }
+  .section-heading { align-items: start; flex-direction: column; gap: .8rem; }
+  .interest-section, .student-life, .about-vinh { padding: 2.5rem 0; }
+  .interest-card { padding: 1.25rem; }
+  .interest-icon { margin-bottom: .75rem; }
+  .news-image img { height: 220px; }
+  .about-panel { grid-template-columns: 1fr; gap: 1.5rem; padding: 1.8rem; }
+  .about-emblem { align-items: start; }
+  .about-emblem img { width: 95px; height: 95px; }
+}
+@media (prefers-reduced-motion: reduce) { .news-image img { transition: none; } }

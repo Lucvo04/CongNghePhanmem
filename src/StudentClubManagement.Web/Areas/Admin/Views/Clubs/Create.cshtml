@@ -1,0 +1,33 @@
+@model StudentClubManagement.Web.ViewModels.Clubs.CreateClubViewModel
+@{ ViewData["Title"] = "Tạo câu lạc bộ"; }
+<section class="container py-5">
+    <div class="account-details mx-auto">
+        <a class="d-inline-block mb-4" asp-area="" asp-controller="ClubManagement" asp-action="Index">← Quản lý câu lạc bộ</a>
+        <p class="eyebrow">Khởi tạo cộng đồng</p>
+        <h1 class="h2 mb-3">Tạo câu lạc bộ</h1>
+        <p class="text-secondary mb-4">Mỗi CLB bắt đầu với một chủ nhiệm. Hãy cấp tài khoản sinh viên cho người phụ trách trước khi tạo.</p>
+        <form asp-action="Create" method="post" class="card community-card p-4 p-md-5">
+            <div asp-validation-summary="ModelOnly" class="text-danger validation-summary" role="alert"></div>
+            <div class="mb-4">
+                <label asp-for="Code" class="form-label fw-semibold"></label>
+                <input asp-for="Code" class="form-control" aria-describedby="code-help code-error" />
+                <p class="form-text mb-1" id="code-help">Mã duy nhất, tối đa 30 ký tự; dùng chữ không dấu, số, dấu gạch ngang hoặc gạch dưới. Mã được giữ cố định sau khi tạo.</p>
+                <span asp-validation-for="Code" id="code-error" class="text-danger small"></span>
+            </div>
+            <partial name="_ClubProfileFields" model="Model" />
+            <hr />
+            <div class="mb-4">
+                <label asp-for="ManagerStudentCode" class="form-label fw-semibold"></label>
+                <input asp-for="ManagerStudentCode" class="form-control" aria-describedby="manager-help manager-error" />
+                <p class="form-text mb-1" id="manager-help">Chọn sinh viên có tài khoản đang hoạt động. Người này sẽ đồng thời trở thành thành viên và chủ nhiệm đầu tiên của CLB.</p>
+                <span asp-validation-for="ManagerStudentCode" id="manager-error" class="text-danger small"></span>
+                <a class="d-block small mt-2" asp-area="Admin" asp-controller="Students" asp-action="Index">Tra cứu tài khoản sinh viên</a>
+            </div>
+            <div class="d-flex flex-column flex-sm-row gap-3">
+                <button class="btn btn-primary px-4 py-2" type="submit">Tạo CLB và phân công chủ nhiệm</button>
+                <a class="btn btn-outline-secondary px-4 py-2" asp-area="" asp-controller="ClubManagement" asp-action="Index">Hủy</a>
+            </div>
+        </form>
+    </div>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
