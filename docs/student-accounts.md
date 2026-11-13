@@ -1,3 +1,5 @@
+> Phiên bản cấp tài khoản trong tài liệu này đã được thay bằng sinh viên tự đăng ký và Admin duyệt ngày 09/11/2026. Xem [hướng dẫn hiện tại](approval-workflows.md). Các quy tắc khóa/mở khóa vẫn áp dụng cho tài khoản đã được duyệt.
+
 # Bước 5 — Quản lý tài khoản sinh viên (PB02)
 
 Ngày thực hiện: 30/10/2026. Thuộc Sprint 1; tiếp nối đăng nhập và đổi mật khẩu ở bước 3–4.

@@ -1,0 +1,79 @@
+@model StudentClubManagement.Web.ViewModels.Events.RegistrationList
+@using System.Globalization
+@{
+    ViewData["Title"] = Model.Event is null ? "Hoạt động đã đăng ký" : "Danh sách đăng ký tham gia";
+    var action = Model.Event is null ? "Mine" : "Index";
+    var from = Model.Filter.From?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    var to = Model.Filter.To?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    var returnUrl = Url.Action(action, new { eventId = Model.Event?.Id, Model.Filter.Search, Model.Filter.Status, Model.Filter.ClubId, From = from, To = to, Model.Page });
+}
+<section class="container py-5">
+    <p class="eyebrow">Kết nối qua hoạt động</p>
+    <h1 class="h2">@ViewData["Title"]</h1>
+    @if (Model.Event is not null) {
+        <p class="text-break">@Model.Event.Title</p>
+        <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.Event.Id">← Chi tiết hoạt động</a>
+        <a class="d-inline-block ms-3" asp-controller="Attendances" asp-action="Index" asp-route-eventId="@Model.Event.Id">Điểm danh →</a>
+    } else {
+        <p>Đăng ký được giữ để tra cứu, kể cả sau khi hủy hoặc rời CLB. Bạn có thể tự hủy trước giờ bắt đầu.</p>
+        <a asp-controller="Events" asp-action="Calendar">Khám phá lịch hoạt động →</a>
+    }
+    @if (TempData["EventMessage"] is string message) { <div class="alert alert-success mt-3" role="status">@message</div> }
+    @if (TempData["EventError"] is string error) { <div class="alert alert-danger mt-3" role="alert">@error</div> }
+    <form asp-action="@action" method="get" class="card community-card p-4 mt-4" aria-label="Bộ lọc đăng ký">
+        @if (Model.Event is not null) { <input type="hidden" name="eventId" value="@Model.Event.Id" /> }
+        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+        <div class="row g-3">
+            <div class="col-md-8"><label for="Search" class="form-label fw-semibold">@(Model.Event is null ? "Tên hoạt động hoặc CLB" : "Họ tên hoặc mã sinh viên")</label>
+                @Html.TextBox("Search", Model.Filter.Search, new { @class = "form-control", maxlength = 180 })</div>
+            <div class="col-md-4"><label for="Status" class="form-label fw-semibold">Trạng thái đăng ký</label>
+                @Html.DropDownList("Status", new[] {
+                    new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem("Tất cả", "all", Model.Filter.Status == "all"),
+                    new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem("Đã đăng ký", "confirmed", Model.Filter.Status == "confirmed"),
+                    new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem("Đã hủy đăng ký", "cancelled", Model.Filter.Status == "cancelled") }, new { @class = "form-select" })</div>
+            @if (Model.Event is null) {
+                <div class="col-md-6"><label for="ClubId" class="form-label fw-semibold">Câu lạc bộ</label>
+                    @Html.DropDownList("ClubId", new Microsoft.AspNetCore.Mvc.Rendering.SelectList(Model.Clubs, "Id", "Name", Model.Filter.ClubId), "Tất cả CLB đã đăng ký hoạt động", new { @class = "form-select" })</div>
+                <div class="col-sm-6 col-md-3"><label for="From" class="form-label fw-semibold">Từ ngày</label>@Html.TextBox("From", from, new { type = "date", @class = "form-control", aria_describedby = "registration-date-help" })</div>
+                <div class="col-sm-6 col-md-3"><label for="To" class="form-label fw-semibold">Đến ngày</label>@Html.TextBox("To", to, new { type = "date", @class = "form-control", aria_describedby = "registration-date-help" })</div>
+            }
+        </div>
+        @if (Model.Event is null) { <p class="small text-secondary mt-3 mb-0" id="registration-date-help">Lọc theo ngày bắt đầu hoạt động, tính cả hai ngày đã chọn theo giờ Việt Nam. Bỏ trống để xem toàn bộ thời gian.</p> }
+        <div class="d-flex flex-wrap gap-2 mt-3"><button class="btn btn-primary" type="submit">Tìm đăng ký</button><a class="btn btn-outline-secondary" asp-action="@action" asp-route-eventId="@Model.Event?.Id">Đặt lại bộ lọc</a></div>
+    </form>
+    <p class="small text-secondary mt-3">“Đã đăng ký” là trạng thái giữ chỗ, không xác nhận đã tham dự.</p>
+    @if (ViewData.ModelState.IsValid) {
+    <p class="text-secondary mt-4" role="status">@Model.Count đăng ký phù hợp · Trang @Model.Page / @Model.Pages</p>
+    @if (Model.Items.Count == 0) { <p class="alert alert-light">Chưa có đăng ký phù hợp. Hãy thử thay đổi hoặc đặt lại bộ lọc.</p> }
+    <div class="row g-3">
+        @foreach (var row in Model.Items) {
+            <div class="col-md-6"><article class="card community-card p-4 h-100" data-registration-id="@row.Id">
+                <span class="badge text-bg-light align-self-start mb-3">@(row.CancelledAt is null ? "Đã đăng ký" : "Đã hủy đăng ký")</span>
+                <h2 class="h5 text-break">@(Model.Event is null ? row.Title : row.FullName)</h2>
+                <p class="text-secondary text-break">@(Model.Event is null ? row.ClubName : row.StudentCode)</p>
+                @if (Model.Event is null) { <p class="small">Hoạt động: @row.EventStatus.Label()</p> }
+                <p>Bắt đầu: @row.StartsAt.Vietnam()<br />Đăng ký: @row.RegisteredAt.Vietnam()</p>
+                @if (row.CancelledAt.HasValue) { <p>Hủy lúc: @row.CancelledAt.Value.Vietnam()</p> }
+                @if (row.CancellationReason is not null) { <p class="text-break">Lý do: @row.CancellationReason</p> }
+                @if (Model.Event is null && row.CanView) {
+                    <a class="mb-3" asp-controller="Events" asp-action="Details" asp-route-id="@row.EventId">Xem hoạt động</a>
+                }
+                @if (Model.Event is null) { <a class="mb-3" asp-action="History" asp-route-id="@row.Id" asp-route-returnUrl="@returnUrl">Lịch sử đăng ký</a> }
+                @if (Model.Event is null) { <a class="mb-3" asp-controller="Attendances" asp-action="History" asp-route-id="@row.Id" asp-route-returnUrl="@returnUrl">Kết quả điểm danh</a> }
+                @if (row.CanCancel) {
+                    <form asp-action="Cancel" asp-route-id="@row.Id" method="post" class="mt-auto">
+                        <input type="hidden" name="RowVersion" value="@Convert.ToBase64String(row.RowVersion)" />
+                        <button class="btn btn-outline-danger">Hủy đăng ký tham gia</button>
+                    </form>
+                }
+            </article></div>
+        }
+    </div>
+    @if (Model.Pages > 1) {
+        <nav class="d-flex flex-wrap gap-3 mt-4" aria-label="Phân trang đăng ký">
+            @if (Model.Page > 1) { <a asp-action="@action" asp-route-eventId="@Model.Event?.Id" asp-route-Search="@Model.Filter.Search" asp-route-Status="@Model.Filter.Status" asp-route-ClubId="@Model.Filter.ClubId" asp-route-From="@from" asp-route-To="@to" asp-route-page="@(Model.Page-1)">Trang trước</a> }
+            @if (Model.Page < Model.Pages) { <a asp-action="@action" asp-route-eventId="@Model.Event?.Id" asp-route-Search="@Model.Filter.Search" asp-route-Status="@Model.Filter.Status" asp-route-ClubId="@Model.Filter.ClubId" asp-route-From="@from" asp-route-To="@to" asp-route-page="@(Model.Page+1)">Trang sau</a> }
+        </nav>
+    }
+    }
+</section>

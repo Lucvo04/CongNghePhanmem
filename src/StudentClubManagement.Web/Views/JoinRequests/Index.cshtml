@@ -1,0 +1,44 @@
+@model StudentClubManagement.Web.ViewModels.JoinRequests.JoinRequestListViewModel
+@{ ViewData["Title"] = "Đơn của tôi"; ViewData["ActiveNav"] = "JoinRequests"; }
+<section class="container py-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div><p class="eyebrow">Hành trình tham gia câu lạc bộ</p><h1 class="h2">Đơn của tôi</h1><p class="text-secondary mb-0">Theo dõi đơn đã gửi và giữ lại lịch sử đăng ký của bạn.</p></div>
+        <a class="btn btn-primary align-self-start" asp-controller="Clubs" asp-action="Index">Khám phá câu lạc bộ</a>
+    </div>
+    @if (TempData["JoinRequestNotice"] is string notice) { <div class="alert alert-success" role="status">@notice</div> }
+    @if (Model.TotalCount == 0)
+    {
+        <div class="card community-card p-4 p-md-5"><h2 class="h4">Bạn chưa gửi đơn nào</h2><p class="text-secondary mb-0">Mở một CLB bạn yêu thích, chọn Đăng ký gia nhập và chia sẻ lý do muốn tham gia.</p></div>
+    }
+    else
+    {
+        <p class="small text-secondary">@Model.TotalCount đơn · Trang @Model.Page / @Model.TotalPages</p>
+        <div class="row g-4">
+        @foreach (var item in Model.Requests)
+        {
+            <div class="col-lg-6"><article class="card community-card p-4 h-100">
+                <div class="d-flex justify-content-between flex-wrap gap-2 mb-3"><span class="badge @(item.Status == JoinRequestStatus.Approved ? "text-bg-success" : item.Status == JoinRequestStatus.Rejected ? "text-bg-danger" : item.Status == JoinRequestStatus.Pending ? "text-bg-primary" : "text-bg-secondary")">@item.Status.Label()</span><time class="small text-secondary" datetime="@item.SubmittedAt.ToString("O")">@item.SubmittedAt.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy · HH:mm")</time></div>
+                <h2 class="h5 text-break">@item.ClubName</h2>
+                <p class="club-description text-break mt-3">@item.Reason</p>
+                @if (item.DecisionReason is not null) { <p class="club-description text-break"><strong>Lý do từ chối:</strong> @item.DecisionReason</p> }
+                @if (item.DecidedByName is not null) { <p class="small text-secondary">Người xử lý: @item.DecidedByName</p> }
+                @if (item.ClosedAt is DateTimeOffset closed) { <p class="small text-secondary">@(item.Status == JoinRequestStatus.Withdrawn ? "Đã rút lúc" : "Xử lý lúc") @closed.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy · HH:mm")</p> }
+                <div class="d-flex flex-wrap gap-2 mt-auto">
+                    @if (item.ClubStatus != ClubStatus.Archived) { <a class="btn btn-outline-secondary btn-sm" asp-controller="Clubs" asp-action="Details" asp-route-id="@item.ClubId">Xem CLB</a> }
+                    @if (item.Status == JoinRequestStatus.Pending) { <a class="btn btn-outline-danger btn-sm" asp-action="Withdraw" asp-route-id="@item.Id" aria-label="Rút đơn @item.ClubName">Rút đơn</a> }
+                    @if (item.Status == JoinRequestStatus.Approved) { <a class="btn btn-outline-primary btn-sm" asp-controller="Memberships" asp-action="Mine">CLB của tôi</a> }
+                </div>
+            </article></div>
+        }
+        </div>
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="d-flex gap-3 align-items-center mt-4" aria-label="Phân trang đơn gia nhập">
+                @if (Model.Page > 1) { <a class="btn btn-outline-secondary" asp-action="Index" asp-route-page="@(Model.Page - 1)">Trang trước</a> }
+                <span>Trang @Model.Page / @Model.TotalPages</span>
+                @if (Model.Page < Model.TotalPages) { <a class="btn btn-outline-secondary" asp-action="Index" asp-route-page="@(Model.Page + 1)">Trang sau</a> }
+            </nav>
+        }
+    }
+    <p class="small text-secondary mt-4">Thời gian hiển thị theo giờ Việt Nam. Chỉ bạn và người có quyền xử lý đơn được xem nội dung đăng ký.</p>
+</section>

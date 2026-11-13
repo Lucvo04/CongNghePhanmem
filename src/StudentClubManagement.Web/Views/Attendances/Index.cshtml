@@ -1,0 +1,74 @@
+@model StudentClubManagement.Web.ViewModels.Events.AttendanceList
+@{
+    ViewData["Title"] = "Điểm danh hoạt động";
+    var returnUrl = Url.Action("Index", new { eventId = Model.Event.Id, Model.Search, Model.Status, Model.Page });
+}
+<section class="container py-5">
+    <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.Event.Id">← Chi tiết hoạt động</a>
+    <div class="my-4"><p class="eyebrow">Ghi nhận tham dự</p><h1 class="h2">Điểm danh hoạt động</h1>
+        <h2 class="h4 text-break">@Model.Event.Title</h2><p class="text-secondary text-break">@Model.Event.Club.Name · @Model.Event.StartsAt.Vietnam() — @Model.Event.EndsAt.Vietnam()</p>
+        <span class="badge text-bg-light">@Model.Event.Status.Label()</span>
+    </div>
+    @if (TempData["AttendanceMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
+    @if (TempData["AttendanceError"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }
+    <p class="alert alert-info">@Model.Message</p>
+    <section class="card community-card p-4 mb-4" aria-label="Chốt điểm danh">
+        <h2 class="h4">@(Model.Event.AttendanceFinalizedAt.HasValue ? "Danh sách đã chốt" : "Kiểm tra trước khi chốt")</h2>
+        <p class="mb-2"><strong>@Model.Summary.Total người</strong> trong toàn bộ danh sách hợp lệ, không phụ thuộc bộ lọc/trang bên dưới.</p>
+        <p class="text-secondary">Có mặt: @Model.Summary.Present · Vắng: @Model.Summary.Absent · Có phép: @Model.Summary.Excused · Chưa điểm danh: @Model.Summary.Unmarked</p>
+        @if (Model.Event.AttendanceFinalizedAt.HasValue) {
+            <p class="mb-0">Chốt lúc @Model.Event.AttendanceFinalizedAt.Value.Vietnam(). Danh sách người được chốt giữ nguyên khi sửa kết quả.</p>
+        } else if (Model.CanFinalize) {
+            <form asp-action="Finalize" asp-route-eventId="@Model.Event.Id" method="post">
+                <input type="hidden" name="EventVersion" value="@Convert.ToBase64String(Model.Event.RowVersion)" />
+                <input type="hidden" name="RosterVersion" value="@Model.Summary.Version" />
+                @if (Model.Summary.Unmarked > 0) {
+                    <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="mark-unmarked" name="MarkUnmarkedAbsent" value="true" />
+                        <label class="form-check-label" for="mark-unmarked">Tôi xác nhận chuyển toàn bộ @Model.Summary.Unmarked người chưa điểm danh sang Vắng khi chốt.</label></div>
+                }
+                <button class="btn btn-primary" type="submit">Chốt danh sách điểm danh</button>
+            </form>
+        } else { <p class="small text-secondary mb-0">Chỉ chốt sau giờ kết thúc, khi hoạt động không bị hủy và CLB chưa lưu trữ.</p> }
+    </section>
+    <form method="get" asp-action="Index" class="card community-card p-4 mb-4" aria-label="Bộ lọc điểm danh">
+        <input type="hidden" name="eventId" value="@Model.Event.Id" />
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6"><label for="search" class="form-label fw-semibold">Họ tên hoặc mã sinh viên</label><input id="search" name="search" value="@Model.Search" maxlength="180" class="form-control" /></div>
+            <div class="col-md-4"><label for="status" class="form-label fw-semibold">Kết quả điểm danh</label><select id="status" name="status" class="form-select"><option value="">Tất cả kết quả</option>@foreach (var status in Enum.GetValues<AttendanceStatus>()) { <option value="@((int)status)" selected="@(Model.Status == status)">@status.Label()</option> }</select></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100">Tìm sinh viên</button></div>
+        </div>
+        <a class="mt-3 align-self-start" asp-action="Index" asp-route-eventId="@Model.Event.Id">Đặt lại bộ lọc</a>
+    </form>
+    <p role="status">@Model.Count đăng ký phù hợp · Trang @Model.Page / @Model.Pages</p>
+    @if (Model.Items.Count == 0) { <p class="alert alert-light">Không có đăng ký phù hợp để điểm danh. Hãy kiểm tra danh sách đăng ký hoặc thay đổi bộ lọc.</p> }
+    <div class="row g-3">
+        @foreach (var row in Model.Items) {
+            <div class="col-lg-6"><article class="card community-card p-4 h-100" data-attendance-id="@row.RegistrationId">
+                <span class="badge @(row.Status == AttendanceStatus.Present ? "text-bg-success" : row.Status == AttendanceStatus.Absent ? "text-bg-danger" : "text-bg-light") align-self-start mb-3">@row.Status.Label()</span>
+                <h2 class="h5 text-break">@row.FullName</h2><p class="text-secondary text-break">Mã sinh viên: @row.StudentCode</p>
+                @if (row.MarkedAt.HasValue) { <p class="small text-secondary text-break">Lần ghi gần nhất: @row.MarkedAt.Value.Vietnam()<br />Người thực hiện: @row.MarkedBy</p> }
+                @if (row.IsCancelled) { <p class="small text-secondary">Đăng ký đã hủy; giữ kết quả đã ghi để tra cứu.</p> }
+                <a class="mb-3" asp-action="History" asp-route-id="@row.RegistrationId" asp-route-returnUrl="@returnUrl">Lịch sử điểm danh</a>
+                @if (Model.CanMark && !row.IsCancelled) {
+                    <form asp-action="Save" asp-route-id="@row.RegistrationId" method="post" class="mt-auto">
+                        <input type="hidden" name="EventVersion" value="@Convert.ToBase64String(Model.Event.RowVersion)" />
+                        <input type="hidden" name="RegistrationVersion" value="@Convert.ToBase64String(row.RegistrationVersion)" />
+                        <input type="hidden" name="RowVersion" value="@(row.RowVersion is null ? "" : Convert.ToBase64String(row.RowVersion))" />
+                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                        <label for="result-@row.RegistrationId" class="form-label fw-semibold">Kết quả của @row.FullName</label>
+                        <select id="result-@row.RegistrationId" name="Status" class="form-select mb-3">@foreach (var status in Enum.GetValues<AttendanceStatus>().Where(s => !Model.Event.AttendanceFinalizedAt.HasValue || s != AttendanceStatus.Unmarked)) { <option value="@((int)status)" selected="@(row.Status == status)">@status.Label()</option> }</select>
+                        <label for="reason-@row.RegistrationId" class="form-label">@(Model.Event.AttendanceFinalizedAt.HasValue ? "Lý do sửa sau chốt (bắt buộc)" : "Ghi chú lần thay đổi này (không bắt buộc)")</label>
+                        <textarea id="reason-@row.RegistrationId" name="Reason" class="form-control mb-3" maxlength="500" rows="2" required="@Model.Event.AttendanceFinalizedAt.HasValue"></textarea>
+                        <button class="btn btn-primary" type="submit">Lưu điểm danh</button>
+                    </form>
+                }
+            </article></div>
+        }
+    </div>
+    @if (Model.Pages > 1) {
+        <nav class="d-flex flex-wrap gap-3 mt-4" aria-label="Phân trang điểm danh">
+            @if (Model.Page > 1) { <a asp-action="Index" asp-route-eventId="@Model.Event.Id" asp-route-search="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page-1)">Trang trước</a> }
+            @if (Model.Page < Model.Pages) { <a asp-action="Index" asp-route-eventId="@Model.Event.Id" asp-route-search="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page+1)">Trang sau</a> }
+        </nav>
+    }
+</section>

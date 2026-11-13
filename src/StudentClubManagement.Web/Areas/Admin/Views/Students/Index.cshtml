@@ -9,9 +9,9 @@
         <div>
             <p class="eyebrow">Quản lý người dùng</p>
             <h1 class="h2">Tài khoản sinh viên</h1>
-            <p class="text-secondary mb-0">Cấp tài khoản và kiểm soát quyền sử dụng hệ thống của sinh viên.</p>
+            <p class="text-secondary mb-0">Duyệt hồ sơ tự đăng ký và quản lý trạng thái tài khoản sinh viên.</p>
         </div>
-        <a class="btn btn-primary px-4 py-2 flex-shrink-0" asp-action="Create">Cấp tài khoản</a>
+        <a class="btn btn-primary px-4 py-2 flex-shrink-0" asp-action="Index" asp-route-status="3">Đăng ký chờ duyệt</a>
     </div>
     @if (TempData["StatusMessage"] is string message)
     {
@@ -28,7 +28,7 @@
                 <select id="status" name="status" class="form-select" asp-for="Status">
                     <option value="">Tất cả trạng thái</option>
                     <option value="1">Đang hoạt động</option>
-                    <option value="2">Đã khóa</option>
+                    <option value="2">Đã khóa</option><option value="3">Chờ duyệt</option><option value="4">Đã từ chối</option>
                 </select>
             </div>
             <div class="col-sm-6 col-lg-3 d-flex gap-2">
@@ -42,7 +42,7 @@
     {
         <div class="card community-card p-4 p-md-5 text-center">
             <h2 class="h4">Chưa có tài khoản phù hợp</h2>
-            <p class="text-secondary mb-0">Thử thay đổi bộ lọc hoặc chọn “Cấp tài khoản” để thêm sinh viên.</p>
+            <p class="text-secondary mb-0">Sinh viên tự gửi đăng ký từ trang Đăng nhập. Bạn có thể chọn bộ lọc Chờ duyệt để xử lý hồ sơ mới.</p>
         </div>
     }
     else
@@ -59,8 +59,8 @@
                             <td><strong class="d-block text-break">@student.FullName</strong><span class="text-secondary">@student.StudentCode</span></td>
                             <td class="text-break">@student.Email</td>
                             <td><span class="d-block text-break">@(student.ClassName ?? "Chưa có lớp")</span><span class="small text-secondary text-break">@(student.Faculty ?? "Chưa có khoa")</span></td>
-                            <td><span class="badge @(student.Status == UserStatus.Active ? "text-bg-success" : "text-bg-secondary")">@(student.Status == UserStatus.Active ? "Đang hoạt động" : "Đã khóa")</span></td>
-                            <td><a class="btn btn-sm btn-outline-secondary text-nowrap" asp-action="ChangeStatus" asp-route-id="@student.Id" aria-label="@(student.Status == UserStatus.Active ? "Khóa tài khoản " : "Mở khóa tài khoản ")@student.StudentCode">@(student.Status == UserStatus.Active ? "Khóa" : "Mở khóa")</a></td>
+                            <td><span class="badge @(student.Status == UserStatus.Active ? "text-bg-success" : "text-bg-secondary")">@student.Status.Label()</span></td>
+                            <td>@if (student.Status is UserStatus.Pending or UserStatus.Rejected) { <a class="btn btn-sm btn-primary" asp-action="Review" asp-route-id="@student.Id">@(student.Status == UserStatus.Pending ? "Duyệt đăng ký" : "Xem hồ sơ")</a> } else { <a class="btn btn-sm btn-outline-secondary text-nowrap" asp-action="ChangeStatus" asp-route-id="@student.Id" aria-label="@(student.Status == UserStatus.Active ? "Khóa tài khoản " : "Mở khóa tài khoản ")@student.StudentCode">@(student.Status == UserStatus.Active ? "Khóa" : "Mở khóa")</a> }</td>
                         </tr>
                     }
                     </tbody>

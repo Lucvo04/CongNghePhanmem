@@ -27,45 +27,33 @@ namespace StudentClubManagement.Web.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedName")
+                    b.HasIndex("Name")
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasFilter("[Name] IS NOT NULL");
 
-                    b.ToTable("AspNetRoles", (string)null);
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
                         {
                             Id = "system-admin",
-                            ConcurrencyStamp = "seed-admin-v1",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
+                            Name = "Admin"
                         },
                         new
                         {
                             Id = "system-student",
-                            ConcurrencyStamp = "seed-student-v1",
-                            Name = "Student",
-                            NormalizedName = "STUDENT"
+                            Name = "Student"
                         });
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("StudentClubManagement.Web.Models.Announcement", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -73,102 +61,78 @@ namespace StudentClubManagement.Web.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ClubId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
+                    b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("EventId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("PublishedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("SourceKey")
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("SourceKey")
+                        .IsUnique()
+                        .HasFilter("[SourceKey] IS NOT NULL");
+
+                    b.HasIndex("ClubId", "CreatedAt");
+
+                    b.ToTable("Announcements", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Announcements_Publication", "([Status] = 1 AND [PublishedAt] IS NULL) OR ([Status] IN (2,3) AND [PublishedAt] IS NOT NULL AND [PublishedAt] >= [CreatedAt])");
+
+                            t.HasCheckConstraint("CK_Announcements_Source", "[SourceKey] IS NULL OR (LEN([SourceKey]) = 64 AND [EventId] IS NOT NULL AND [Status] IN (2,3))");
+
+                            t.HasCheckConstraint("CK_Announcements_Text", "LEN(LTRIM(RTRIM([Title]))) > 0 AND LEN(LTRIM(RTRIM([Content]))) > 0");
+                        });
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.AnnouncementRecipient", b =>
+                {
+                    b.Property<int>("AnnouncementId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTimeOffset?>("ReadAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("AnnouncementId", "UserId");
+
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
-                {
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("LoginProvider", "ProviderKey");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserLogins", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId", "LoginProvider", "Name");
-
-                    b.ToTable("AspNetUserTokens", (string)null);
+                    b.ToTable("AnnouncementRecipients", (string)null);
                 });
 
             modelBuilder.Entity("StudentClubManagement.Web.Models.ApplicationUser", b =>
@@ -195,9 +159,6 @@ namespace StudentClubManagement.Web.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Faculty")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -207,18 +168,10 @@ namespace StudentClubManagement.Web.Data.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -229,8 +182,9 @@ namespace StudentClubManagement.Web.Data.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                    b.Property<string>("RoleId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -243,35 +197,62 @@ namespace StudentClubManagement.Web.Data.Migrations
                         .HasColumnType("nvarchar(24)")
                         .UseCollation("Latin1_General_100_CI_AS");
 
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
                         .IsUnique()
                         .HasDatabaseName("EmailIndex");
 
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex");
+                    b.HasIndex("RoleId");
 
                     b.HasIndex("StudentCode")
                         .IsUnique()
                         .HasFilter("[StudentCode] IS NOT NULL");
 
-                    b.ToTable("AspNetUsers", null, t =>
+                    b.ToTable("Users", null, t =>
                         {
                             t.HasCheckConstraint("CK_Users_FullName", "LEN(LTRIM(RTRIM([FullName]))) > 0");
 
-                            t.HasCheckConstraint("CK_Users_Status", "[Status] IN (1, 2)");
+                            t.HasCheckConstraint("CK_Users_Status", "[Status] IN (1, 2, 3, 4)");
 
                             t.HasCheckConstraint("CK_Users_StudentCode", "[StudentCode] IS NULL OR LEN(LTRIM(RTRIM([StudentCode]))) > 0");
+                        });
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.Attendance", b =>
+                {
+                    b.Property<int>("RegistrationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsInFinalRoster")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("MarkedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("MarkedById")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("RegistrationId");
+
+                    b.HasIndex("MarkedById");
+
+                    b.ToTable("Attendances", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Attendances_FinalResult", "[IsInFinalRoster] = 0 OR [Status] IN (1,2,3)");
+
+                            t.HasCheckConstraint("CK_Attendances_Status", "[Status] IN (0,1,2,3)");
                         });
                 });
 
@@ -382,6 +363,268 @@ namespace StudentClubManagement.Web.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("StudentClubManagement.Web.Models.ClubEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("AttendanceFinalizedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Audience")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClubId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset>("EndsAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTimeOffset?>("PublishedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("RegistrationDeadline")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset>("StartsAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId", "StartsAt");
+
+                    b.ToTable("Events", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Events_Audience", "[Audience] IN (1,2)");
+
+                            t.HasCheckConstraint("CK_Events_Capacity", "[Capacity] > 0");
+
+                            t.HasCheckConstraint("CK_Events_FinalizedTime", "[AttendanceFinalizedAt] IS NULL OR ([AttendanceFinalizedAt] >= [EndsAt] AND [PublishedAt] IS NOT NULL AND [Status] IN (2,3,4))");
+
+                            t.HasCheckConstraint("CK_Events_Period", "[StartsAt] < [EndsAt] AND [RegistrationDeadline] <= [StartsAt]");
+
+                            t.HasCheckConstraint("CK_Events_Publication", "([Status] = 1 AND [PublishedAt] IS NULL) OR ([Status] IN (2,4) AND [PublishedAt] IS NOT NULL) OR [Status] = 3");
+
+                            t.HasCheckConstraint("CK_Events_Status", "[Status] IN (1,2,3,4)");
+
+                            t.HasCheckConstraint("CK_Events_Text", "LEN(LTRIM(RTRIM([Title]))) > 0 AND LEN(LTRIM(RTRIM([Location]))) > 0");
+                        });
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.ClubProposal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicantId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("ClubId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicantId")
+                        .IsUnique()
+                        .HasFilter("[Status] = 1");
+
+                    b.HasIndex("ClubId")
+                        .IsUnique()
+                        .HasFilter("[ClubId] IS NOT NULL");
+
+                    b.HasIndex("Status", "SubmittedAt");
+
+                    b.ToTable("ClubProposals", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ClubProposals_Club", "([Status]=2 AND [ClubId] IS NOT NULL) OR ([Status]<>2 AND [ClubId] IS NULL)");
+
+                            t.HasCheckConstraint("CK_ClubProposals_Status", "[Status] IN (1,2,3,4)");
+
+                            t.HasCheckConstraint("CK_ClubProposals_Text", "LEN(LTRIM(RTRIM([Name])))>0 AND LEN(LTRIM(RTRIM([Purpose])))>0");
+                        });
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.EventRegistration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("EventId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("RegisteredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId", "UserId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "RegisteredAt");
+
+                    b.ToTable("EventRegistrations", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_EventRegistrations_Time", "[CancelledAt] IS NULL OR [CancelledAt] >= [RegisteredAt]");
+                        });
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.JoinRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("ClosedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("ClubId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DecidedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DecisionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("MembershipId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DecidedById");
+
+                    b.HasIndex("MembershipId")
+                        .IsUnique()
+                        .HasFilter("[MembershipId] IS NOT NULL");
+
+                    b.HasIndex("UserId", "ClubId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_JoinRequests_Pending")
+                        .HasFilter("[Status] = 1");
+
+                    b.HasIndex("UserId", "SubmittedAt");
+
+                    b.HasIndex("ClubId", "Status", "SubmittedAt");
+
+                    b.ToTable("JoinRequests", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_JoinRequests_Decision", "([Status] IN (1,2) AND [DecidedById] IS NULL AND [DecisionReason] IS NULL AND [MembershipId] IS NULL) OR ([Status] = 3 AND [DecidedById] IS NOT NULL AND [DecisionReason] IS NULL AND [MembershipId] IS NOT NULL) OR ([Status] = 4 AND [DecidedById] IS NOT NULL AND [MembershipId] IS NULL AND [DecisionReason] IS NOT NULL AND LEN(LTRIM(RTRIM([DecisionReason]))) > 0)");
+
+                            t.HasCheckConstraint("CK_JoinRequests_Period", "([Status] = 1 AND [ClosedAt] IS NULL) OR ([Status] IN (2,3,4) AND [ClosedAt] >= [SubmittedAt] AND [ClosedAt] IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_JoinRequests_Reason", "LEN(LTRIM(RTRIM([Reason]))) > 0");
+
+                            t.HasCheckConstraint("CK_JoinRequests_Status", "[Status] IN (1, 2, 3, 4)");
+                        });
+                });
+
             modelBuilder.Entity("StudentClubManagement.Web.Models.Membership", b =>
                 {
                     b.Property<int>("Id")
@@ -441,55 +684,68 @@ namespace StudentClubManagement.Web.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("StudentClubManagement.Web.Models.Announcement", b =>
+                {
+                    b.HasOne("StudentClubManagement.Web.Models.Club", "Club")
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StudentClubManagement.Web.Models.ClubEvent", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Club");
+
+                    b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.AnnouncementRecipient", b =>
+                {
+                    b.HasOne("StudentClubManagement.Web.Models.Announcement", "Announcement")
+                        .WithMany()
+                        .HasForeignKey("AnnouncementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Announcement");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.ApplicationUser", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("StudentClubManagement.Web.Models.Attendance", b =>
                 {
-                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", null)
+                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", "MarkedBy")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
-                {
-                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("MarkedById")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("StudentClubManagement.Web.Models.EventRegistration", "Registration")
+                        .WithOne("Attendance")
+                        .HasForeignKey("StudentClubManagement.Web.Models.Attendance", "RegistrationId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-                });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
-                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("MarkedBy");
+
+                    b.Navigation("Registration");
                 });
 
             modelBuilder.Entity("StudentClubManagement.Web.Models.AuditLog", b =>
@@ -501,6 +757,87 @@ namespace StudentClubManagement.Web.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Actor");
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.ClubEvent", b =>
+                {
+                    b.HasOne("StudentClubManagement.Web.Models.Club", "Club")
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Club");
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.ClubProposal", b =>
+                {
+                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", "Applicant")
+                        .WithMany()
+                        .HasForeignKey("ApplicantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StudentClubManagement.Web.Models.Club", "Club")
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Applicant");
+
+                    b.Navigation("Club");
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.EventRegistration", b =>
+                {
+                    b.HasOne("StudentClubManagement.Web.Models.ClubEvent", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.JoinRequest", b =>
+                {
+                    b.HasOne("StudentClubManagement.Web.Models.Club", "Club")
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", "DecidedBy")
+                        .WithMany()
+                        .HasForeignKey("DecidedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("StudentClubManagement.Web.Models.Membership", "Membership")
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("StudentClubManagement.Web.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Club");
+
+                    b.Navigation("DecidedBy");
+
+                    b.Navigation("Membership");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("StudentClubManagement.Web.Models.Membership", b =>
@@ -530,6 +867,11 @@ namespace StudentClubManagement.Web.Data.Migrations
             modelBuilder.Entity("StudentClubManagement.Web.Models.Club", b =>
                 {
                     b.Navigation("Memberships");
+                });
+
+            modelBuilder.Entity("StudentClubManagement.Web.Models.EventRegistration", b =>
+                {
+                    b.Navigation("Attendance");
                 });
 #pragma warning restore 612, 618
         }

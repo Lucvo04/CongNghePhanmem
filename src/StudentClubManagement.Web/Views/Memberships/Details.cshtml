@@ -1,0 +1,44 @@
+@model StudentClubManagement.Web.ViewModels.Memberships.MemberDetailsViewModel
+@{
+    ViewData["Title"] = "Chi tiết thành viên"; var item = Model.Member;
+    string HistoryLabel(string action) => action switch { "MembershipSuspended" => "Tạm đình chỉ", "MembershipRestored" => "Khôi phục hoạt động", "MembershipEnded" => "Rời CLB", _ => "Cập nhật" };
+}
+<section class="container py-5">
+    <a asp-action="@(Model.CanManage ? "Index" : "Mine")" asp-route-clubId="@(Model.CanManage ? item.ClubId : (int?)null)">← Danh sách</a>
+    <p class="eyebrow mt-4">@item.ClubName</p><h1 class="h2 text-break">@item.FullName</h1>
+    @if (TempData["MembershipNotice"] is string notice) { <div class="alert alert-success" role="status">@notice</div> }
+    <div class="card community-card p-4 mt-4">
+        <dl class="row mb-0">
+            <dt class="col-sm-4">Mã sinh viên</dt><dd class="col-sm-8">@(item.StudentCode ?? "Chưa cập nhật")</dd>
+            <dt class="col-sm-4">Lớp / Khoa</dt><dd class="col-sm-8 text-break">@(item.ClassName ?? "Chưa cập nhật") / @(item.Faculty ?? "Chưa cập nhật")</dd>
+            <dt class="col-sm-4">Vai trò</dt><dd class="col-sm-8">@(item.Role == ClubRole.Manager ? "Chủ nhiệm" : "Thành viên")</dd>
+            <dt class="col-sm-4">Tư cách thành viên</dt><dd class="col-sm-8">@item.Status.Label()</dd>
+            <dt class="col-sm-4">Tài khoản đăng nhập</dt><dd class="col-sm-8">@(item.AccountStatus == UserStatus.Active ? "Đang hoạt động" : "Đang bị khóa")</dd>
+            <dt class="col-sm-4">Bắt đầu tham gia</dt><dd class="col-sm-8">@item.JoinedAt.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy · HH:mm")</dd>
+            @if (item.EndedAt is DateTimeOffset ended) { <dt class="col-sm-4">Kết thúc</dt><dd class="col-sm-8">@ended.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy · HH:mm")</dd> }
+        </dl>
+        @if (item.Role == ClubRole.Manager && item.EndedAt is null) { <p class="alert alert-info mb-0 mt-3">Chủ nhiệm cần được chuyển giao trước khi đình chỉ hoặc rời CLB. Liên hệ Admin để thực hiện chuyển giao.</p> }
+        else if (item.Status != MembershipStatus.Left && item.ClubStatus != ClubStatus.Archived)
+        {
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                @if (Model.CanManage) { <a class="btn btn-primary" asp-action="ChangeStatus" asp-route-id="@item.Id">Thay đổi trạng thái</a> }
+                @if (Model.IsOwner) { <a class="btn btn-outline-danger" asp-action="Leave" asp-route-id="@item.Id">Rời CLB</a> }
+            </div>
+        }
+        @if (item.Status == MembershipStatus.Left) { <p class="text-secondary mt-3 mb-0">Đợt tham gia này đã kết thúc. Gia nhập lại cần đơn mới, lịch sử cũ vẫn được giữ.</p> }
+    </div>
+    <h2 class="h4 mt-5">Lịch sử thay đổi trạng thái</h2>
+    <p class="small text-secondary">@Model.TotalCount lần thay đổi · Giờ Việt Nam · Trang @Model.Page / @Model.TotalPages</p>
+    @if (Model.History.Count == 0) { <p>Chưa có thay đổi trạng thái được ghi nhận cho đợt tham gia này.</p> }
+    @foreach (var entry in Model.History)
+    {
+        <article class="card community-card p-4 mb-3"><h3 class="h6">@HistoryLabel(entry.Action)</h3>
+            <p class="small text-secondary">@entry.ActorName · @entry.OccurredAt.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy · HH:mm")</p>
+            <p class="club-description text-break mb-0">@entry.Reason</p>
+        </article>
+    }
+    @if (Model.TotalPages > 1) { <nav class="d-flex gap-3" aria-label="Phân trang lịch sử thành viên">
+        @if (Model.Page > 1) { <a asp-action="Details" asp-route-id="@item.Id" asp-route-page="@(Model.Page - 1)">Trang trước</a> }
+        @if (Model.Page < Model.TotalPages) { <a asp-action="Details" asp-route-id="@item.Id" asp-route-page="@(Model.Page + 1)">Trang sau</a> }
+    </nav> }
+</section>

@@ -1,0 +1,22 @@
+@model StudentClubManagement.Web.ViewModels.Announcements.AnnouncementForm
+@{ ViewData["Title"] = Model.Id.HasValue ? "Sửa bản nháp" : "Soạn thông báo"; }
+<section class="container py-5">
+    <a asp-action="Index" asp-route-clubId="@Model.Club.Id">← Thông báo CLB</a>
+    <div class="account-details mt-4"><p class="eyebrow">@Model.Club.Name</p><h1 class="h2">@ViewData["Title"]</h1>
+        <div class="card community-card p-4 p-md-5 mt-4">
+            <p class="text-secondary">Bản nháp chỉ người quản lý thấy. Sau khi lưu, bạn sẽ kiểm tra nội dung và số người nhận trước khi đăng.</p>
+            <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+            <form asp-action="@(Model.Id.HasValue ? "Edit" : "Create")" asp-route-id="@Model.Id" asp-route-clubId="@Model.Club.Id" method="post">
+                <input asp-for="RowVersion" type="hidden" />
+                <div class="mb-3"><label asp-for="Title" class="form-label"></label><input asp-for="Title" maxlength="180" class="form-control" /></div>
+                <div class="mb-3"><label asp-for="EventId" class="form-label"></label><select asp-for="EventId" class="form-select">
+                    <option value="">Thành viên CLB đang hoạt động</option>
+                    @foreach (var item in Model.Events) { <option value="@item.Id">Người đăng ký: @item.Title</option> }
+                </select><small class="text-secondary">Chỉ gửi đến tài khoản sinh viên đang hoạt động. Với hoạt động, chỉ lấy người chưa hủy đăng ký.</small></div>
+                <div class="mb-3"><label asp-for="Content" class="form-label"></label><textarea asp-for="Content" maxlength="4000" rows="10" class="form-control" aria-describedby="content-help"></textarea><small id="content-help" class="text-secondary">Tối đa 4.000 ký tự. Có thể xuống dòng; nội dung hiển thị dưới dạng văn bản.</small></div>
+                <div class="d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">Lưu bản nháp</button><a class="btn btn-outline-secondary" asp-action="Index" asp-route-clubId="@Model.Club.Id">Quay lại</a>@if (Model.Id.HasValue) { <a class="btn btn-link" asp-action="Edit" asp-route-id="@Model.Id">Tải lại bản nháp</a> }</div>
+            </form>
+        </div>
+    </div>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

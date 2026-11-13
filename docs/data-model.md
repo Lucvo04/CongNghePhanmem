@@ -1,6 +1,12 @@
+> Cập nhật 13/11/2026: PB12–PB15 đã có đăng ký, lịch sử và chốt điểm danh. PB16 thêm Announcements và AnnouncementRecipients; PB17 thêm ReadAt, bảng người nhận hiện có 3 cột. PB18 thêm SourceKey, Announcements hiện có 10 cột. Tổng cộng vẫn 12 bảng nghiệp vụ; xem [SQL thông báo](announcements.md), [đánh dấu đã đọc](notification-inbox.md), [thông báo tự động](event-change-notifications.md) và [schema hiện tại](simple-database.md). Quyền hệ thống dùng Users.RoleId → Roles, không còn UserRoles. Các phần theo ngày bên dưới ghi lại phiên bản trước.
+
 # Bước 2 — Dữ liệu tài khoản, câu lạc bộ và thành viên
 
+**Cấu trúc hiện tại 09/11/2026:** Users, Roles, Clubs, Memberships, JoinRequests, ClubProposals, AuditLogs, Events và __EFMigrationsHistory. Users.RoleId thay thế UserRoles; Users còn 16 cột, Roles còn Id/Name. Xem [schema hiện tại](simple-database.md) và [luồng tự đăng ký/phê duyệt](approval-workflows.md). Các mục theo bước bên dưới là lịch sử thiết kế, không phải hướng dẫn schema mới.
+
 Ngày triển khai: 30/10/2026. Đây là công việc nền tảng của Sprint 1, chưa phải một chức năng hoàn chỉnh để nghiệm thu PB01–PB06.
+
+Cập nhật PB09 ngày 04/11/2026: quản lý trạng thái thành viên dùng Memberships hiện có và lịch sử trạng thái trong AuditLogs (EntityType = Membership); không thêm bảng/migration. Xem [thiết kế và quy tắc thành viên](memberships.md). Các đăng ký sự kiện tương lai sẽ được tích hợp khi triển khai PB10/PB12.
 
 ## Phạm vi và kiến trúc
 

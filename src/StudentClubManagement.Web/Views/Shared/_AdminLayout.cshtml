@@ -1,7 +1,7 @@
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
-    var clubs = controller is "Clubs" or "ClubManagement";
+    var clubs = controller is "Clubs" or "ClubManagement" or "JoinRequestReview" or "Memberships" or "Events" or "EventRegistrations" or "Attendances";
     var account = controller == "Account" && action != "ChangePassword";
 }
 <!DOCTYPE html>
@@ -29,6 +29,8 @@
             <a class="admin-nav-link @(controller == "Dashboard" ? "active" : "")" aria-current="@(controller == "Dashboard" ? "page" : null)" aria-label="Tổng quan" title="Tổng quan" asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><span class="nav-symbol" aria-hidden="true">▦</span><span class="nav-label">Tổng quan</span></a>
             <a class="admin-nav-link @(controller == "Students" ? "active" : "")" aria-current="@(controller == "Students" ? "page" : null)" aria-label="Tài khoản sinh viên" title="Tài khoản sinh viên" asp-area="Admin" asp-controller="Students" asp-action="Index"><span class="nav-symbol" aria-hidden="true">♙</span><span class="nav-label">Tài khoản sinh viên</span></a>
             <a class="admin-nav-link @(clubs ? "active" : "")" aria-current="@(clubs ? "page" : null)" aria-label="Quản lý câu lạc bộ" title="Quản lý câu lạc bộ" asp-area="" asp-controller="ClubManagement" asp-action="Index"><span class="nav-symbol" aria-hidden="true">◇</span><span class="nav-label">Quản lý câu lạc bộ</span></a>
+            <a class="admin-nav-link @(controller == "ClubProposals" ? "active" : "")" asp-area="" asp-controller="ClubProposals" asp-action="Index" aria-label="Duyệt thành lập CLB" title="Duyệt thành lập CLB" aria-current="@(controller == "ClubProposals" ? "page" : null)"><span class="nav-symbol" aria-hidden="true">＋</span><span class="nav-label">Duyệt thành lập CLB</span></a>
+            <a class="admin-nav-link @(controller == "Announcements" ? "active" : "")" asp-area="" asp-controller="Announcements" asp-action="Index" aria-label="Quản lý thông báo" title="Quản lý thông báo" aria-current="@(controller == "Announcements" ? "page" : null)"><span class="nav-symbol" aria-hidden="true">✉</span><span class="nav-label">Quản lý thông báo</span></a>
             <p class="nav-group nav-label">CÁ NHÂN</p>
             <a class="admin-nav-link @(account ? "active" : "")" aria-current="@(account ? "page" : null)" aria-label="Tài khoản của tôi" title="Tài khoản của tôi" asp-area="" asp-controller="Account" asp-action="Overview"><span class="nav-symbol" aria-hidden="true">◎</span><span class="nav-label">Tài khoản của tôi</span></a>
             <a class="admin-nav-link @(controller == "Account" && action == "ChangePassword" ? "active" : "")" aria-current="@(controller == "Account" && action == "ChangePassword" ? "page" : null)" aria-label="Đổi mật khẩu" title="Đổi mật khẩu" asp-area="" asp-controller="Account" asp-action="ChangePassword"><span class="nav-symbol" aria-hidden="true">⚿</span><span class="nav-label">Đổi mật khẩu</span></a>

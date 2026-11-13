@@ -8,6 +8,7 @@ using StudentClubManagement.Web.Services;
 
 var bootstrapAdmin = args.Contains("--bootstrap-admin", StringComparer.Ordinal);
 var builder = WebApplication.CreateBuilder(args.Where(arg => arg != "--bootstrap-admin").ToArray());
+builder.Services.AddScoped<EventRegistrationService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
@@ -17,7 +18,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddClubIdentity(builder.Environment.IsDevelopment());
 builder.Services.AddScoped<AdminBootstrapper>();
 builder.Services.AddScoped<StudentAccountService>();
+builder.Services.AddScoped<StudentRegistrationService>();
+builder.Services.AddScoped<ClubProposalService>();
 builder.Services.AddScoped<PersonalProfileService>();
+builder.Services.AddScoped<JoinRequestService>();
+builder.Services.AddScoped<JoinRequestReviewService>();
+builder.Services.AddScoped<MembershipService>();
+builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<EventNoticeService>();
+builder.Services.AddScoped<AttendanceService>();
+builder.Services.AddScoped<AnnouncementService>();
 builder.Services.AddScoped<ClubOperationLocks>();
 builder.Services.AddScoped<ClubAccessService>();
 builder.Services.AddScoped<ClubManagementService>();

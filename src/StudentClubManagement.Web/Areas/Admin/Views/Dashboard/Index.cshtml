@@ -5,12 +5,41 @@
     string ActivityName(string action) => action switch
     {
         "StudentCreated" => "Cấp tài khoản sinh viên",
+        "EventRegistered" => "Đăng ký tham gia hoạt động",
+        "EventRegistrationCancelled" => "Hủy đăng ký hoạt động",
+        "AttendanceUpdated" => "Ghi điểm danh hoạt động",
+        "AttendanceCorrected" => "Sửa điểm danh sau chốt",
+        "AttendanceFinalized" => "Chốt danh sách điểm danh",
+        "AnnouncementCreated" => "Soạn thông báo",
+        "AnnouncementUpdated" => "Sửa bản nháp thông báo",
+        "AnnouncementPublished" => "Đăng thông báo",
+        "EventNoticePublished" => "Tự động thông báo hoạt động",
+        "AnnouncementArchived" => "Lưu trữ thông báo",
+        "StudentRegistered" => "Sinh viên gửi đăng ký",
+        "StudentRegistrationApproved" => "Duyệt tài khoản sinh viên",
+        "StudentRegistrationRejected" => "Từ chối đăng ký tài khoản",
+        "ClubProposalSubmitted" => "Gửi đơn thành lập CLB",
+        "ClubProposalApproved" => "Duyệt thành lập CLB",
+        "ClubProposalRejected" => "Từ chối thành lập CLB",
+        "ClubProposalWithdrawn" => "Rút đơn thành lập CLB",
         "StudentDisabled" => "Khóa tài khoản sinh viên",
         "StudentEnabled" => "Mở lại tài khoản sinh viên",
         "ClubCreated" => "Tạo câu lạc bộ",
         "ClubProfileUpdated" => "Cập nhật thông tin câu lạc bộ",
         "ClubManagerTransferred" => "Chuyển giao chủ nhiệm",
         "PersonalProfileUpdated" => "Cập nhật hồ sơ cá nhân",
+        "JoinRequestSubmitted" => "Gửi đơn gia nhập CLB",
+        "JoinRequestWithdrawn" => "Rút đơn gia nhập CLB",
+        "JoinRequestApproved" => "Chấp nhận đơn gia nhập CLB",
+        "JoinRequestRejected" => "Từ chối đơn gia nhập CLB",
+        "MembershipSuspended" => "Tạm đình chỉ thành viên CLB",
+        "MembershipRestored" => "Khôi phục thành viên CLB",
+        "MembershipEnded" => "Kết thúc tư cách thành viên CLB",
+        "EventCreated" => "Tạo bản nháp hoạt động",
+        "EventUpdated" => "Sửa hoạt động",
+        "EventPublished" => "Công bố hoạt động",
+        "EventCancelled" => "Hủy hoạt động",
+        "EventCompleted" => "Hoàn thành hoạt động",
         _ => "Cập nhật hệ thống"
     };
 }
@@ -27,7 +56,7 @@
             <section class="dashboard-panel" aria-labelledby="recent-clubs-title"><div class="panel-heading"><h2 id="recent-clubs-title">Câu lạc bộ mới tạo</h2><a asp-area="" asp-controller="ClubManagement" asp-action="Index">Xem tất cả ↗</a></div>
                 @if (Model.RecentClubs.Count == 0)
                 {
-                    <div class="dashboard-empty"><span aria-hidden="true">◇</span><h3>Khởi đầu một cộng đồng mới</h3><p>Chưa có câu lạc bộ trong hệ thống. Hãy cấp tài khoản sinh viên và tạo CLB đầu tiên.</p><a asp-area="Admin" asp-controller="Clubs" asp-action="Create">Tạo câu lạc bộ đầu tiên ↗</a></div>
+                    <div class="dashboard-empty"><span aria-hidden="true">◇</span><h3>Khởi đầu một cộng đồng mới</h3><p>Chưa có câu lạc bộ trong hệ thống. Hãy duyệt đăng ký sinh viên và xem các đề nghị thành lập CLB.</p><a asp-area="Admin" asp-controller="Clubs" asp-action="Create">Tạo câu lạc bộ đầu tiên ↗</a></div>
                 }
                 else
                 {
@@ -39,7 +68,7 @@
                     </tbody></table></div>
                 }
             </section>
-            <section class="dashboard-panel" aria-labelledby="quick-title"><div class="panel-heading"><h2 id="quick-title">Thao tác nhanh</h2><span class="panel-caption">Công việc thường dùng</span></div><div class="quick-actions"><a asp-area="Admin" asp-controller="Students" asp-action="Create"><span aria-hidden="true">＋</span><strong>Cấp tài khoản</strong><small>Thêm sinh viên vào hệ thống</small></a><a asp-area="" asp-controller="ClubManagement" asp-action="Index"><span aria-hidden="true">◇</span><strong>Quản lý câu lạc bộ</strong><small>Thông tin và người phụ trách</small></a><a asp-area="" asp-controller="Clubs" asp-action="Index"><span aria-hidden="true">↗</span><strong>Xem danh mục CLB</strong><small>Góc nhìn của sinh viên</small></a></div></section>
+            <section class="dashboard-panel" aria-labelledby="quick-title"><div class="panel-heading"><h2 id="quick-title">Thao tác nhanh</h2><span class="panel-caption">Công việc thường dùng</span></div><div class="quick-actions"><a asp-area="Admin" asp-controller="Students" asp-action="Index" asp-route-status="3"><span aria-hidden="true">＋</span><strong>Duyệt đăng ký</strong><small>Hồ sơ sinh viên đang chờ</small></a><a asp-area="" asp-controller="ClubManagement" asp-action="Index"><span aria-hidden="true">◇</span><strong>Quản lý câu lạc bộ</strong><small>Thông tin và người phụ trách</small></a><a asp-area="" asp-controller="Clubs" asp-action="Index"><span aria-hidden="true">↗</span><strong>Xem danh mục CLB</strong><small>Góc nhìn của sinh viên</small></a></div></section>
         </div>
         <div>
             <section class="dashboard-panel" aria-labelledby="activity-title"><div class="panel-heading"><h2 id="activity-title">Hoạt động gần đây</h2><span class="activity-dot" aria-hidden="true"></span></div>

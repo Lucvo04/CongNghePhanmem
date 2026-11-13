@@ -49,6 +49,10 @@
                         <h2 class="h4 text-break">@club.Name</h2>
                         <p class="text-break">@(club.Category ?? "Chưa có lĩnh vực")</p>
                         <dl class="mb-4"><dt class="small text-secondary">Chủ nhiệm</dt><dd class="text-break mb-0">@(club.ManagerName ?? "Chưa có người phụ trách")</dd><dd class="small text-secondary text-break">@club.ManagerCode</dd></dl>
+                        <a class="btn btn-outline-primary mb-3" asp-controller="JoinRequestReview" asp-action="Index" asp-route-clubId="@club.Id">Đơn gia nhập</a>
+                        <a class="btn btn-outline-primary mb-3" asp-controller="Memberships" asp-action="Index" asp-route-clubId="@club.Id">Thành viên</a>
+                        <a class="btn btn-outline-primary mb-3" asp-controller="Events" asp-action="Index" asp-route-clubId="@club.Id">Hoạt động</a>
+                        <a class="btn btn-outline-primary mb-3" asp-controller="Announcements" asp-action="Index" asp-route-clubId="@club.Id">Thông báo</a>
                         @if (club.Status != ClubStatus.Archived)
                         {
                             <div class="d-flex flex-wrap gap-2 mt-auto">

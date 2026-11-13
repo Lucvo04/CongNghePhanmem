@@ -1,8 +1,8 @@
-﻿@{
+@{
     Layout = "_Layout";
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     if (User.IsInRole(StudentClubManagement.Web.Security.SystemRoles.Admin) &&
-        (controller == "ClubManagement" || controller == "Account"))
+        (controller == "ClubManagement" || controller == "ClubProposals" || controller == "JoinRequestReview" || controller == "Memberships" || controller == "Events" || controller == "EventRegistrations" || controller == "Attendances" || controller == "Announcements" || controller == "Account"))
     {
         Layout = "_AdminLayout";
     }

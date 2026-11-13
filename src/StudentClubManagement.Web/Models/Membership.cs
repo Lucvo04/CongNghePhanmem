@@ -27,3 +27,14 @@ public enum MembershipStatus
     Suspended = 2,
     Left = 3
 }
+
+public static class MembershipStatusText
+{
+    public static string Label(this MembershipStatus status) => status switch
+    {
+        MembershipStatus.Active => "Đang hoạt động",
+        MembershipStatus.Suspended => "Tạm đình chỉ",
+        MembershipStatus.Left => "Đã rời CLB",
+        _ => "Không xác định"
+    };
+}

@@ -1,0 +1,12 @@
+@model StudentClubManagement.Web.ViewModels.Admin.StudentRegistrationReview
+@using StudentClubManagement.Web.Models
+@{ ViewData["Title"] = "Duyệt đăng ký sinh viên"; }
+<section class="container py-5"><a asp-action="Index" asp-route-status="3">← Đăng ký chờ duyệt</a><div class="account-details mt-4"><h1 class="h2">Duyệt đăng ký sinh viên</h1>
+<div class="card community-card p-4 mt-4"><dl class="row"><dt class="col-sm-4">Họ tên</dt><dd class="col-sm-8 text-break">@Model.Student.FullName</dd><dt class="col-sm-4">Mã sinh viên</dt><dd class="col-sm-8">@Model.Student.StudentCode</dd><dt class="col-sm-4">Email</dt><dd class="col-sm-8 text-break">@Model.Student.Email</dd><dt class="col-sm-4">Lớp / Khoa</dt><dd class="col-sm-8 text-break">@Model.Student.ClassName / @Model.Student.Faculty</dd><dt class="col-sm-4">Trạng thái</dt><dd class="col-sm-8">@Model.Student.Status.Label()</dd></dl>
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+@if (Model.Student.Status == UserStatus.Pending) {
+<form asp-action="Review" asp-route-id="@Model.Student.Id" method="post"><input asp-for="ConcurrencyStamp" type="hidden" />
+<label asp-for="Approve" class="form-label"></label><select asp-for="Approve" class="form-select mb-3"><option value="">Chọn quyết định</option><option value="true">Chấp nhận đăng ký</option><option value="false">Từ chối đăng ký</option></select>
+<label asp-for="Reason" class="form-label"></label><textarea asp-for="Reason" maxlength="500" rows="3" class="form-control"></textarea><p class="small text-secondary mt-2">Bắt buộc khi từ chối. Mật khẩu do sinh viên tự đặt, Admin không xem được.</p><button class="btn btn-primary">Lưu quyết định</button><a class="btn btn-link" asp-action="Review" asp-route-id="@Model.Student.Id">Tải lại</a></form>
+} else { <p>Hồ sơ đã được xử lý. Quyết định được lưu trong nhật ký quản trị.</p> }
+</div></div></section>

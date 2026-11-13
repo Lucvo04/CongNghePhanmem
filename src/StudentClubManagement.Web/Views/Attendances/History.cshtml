@@ -1,0 +1,41 @@
+@model StudentClubManagement.Web.ViewModels.Events.AttendanceHistory
+@{
+    ViewData["Title"] = Model.CanManage ? "Lịch sử điểm danh" : "Kết quả điểm danh của tôi";
+    var back = Model.ReturnUrl ?? (Model.CanManage ? Url.Action("Index", new { eventId = Model.EventId }) : Url.Action("Mine", "EventRegistrations"));
+}
+<section class="container py-5">
+    <a href="@back">← Quay lại danh sách</a>
+    <p class="eyebrow mt-4">Ghi nhận tham dự</p><h1 class="h2">@ViewData["Title"]</h1>
+    <div class="card community-card p-4 my-4">
+        <h2 class="h4 text-break">@Model.Title</h2><p class="text-secondary text-break">@Model.ClubName</p>
+        <p class="text-break">@Model.FullName · @Model.StudentCode</p>
+        @if (Model.EventStatus == EventStatus.Cancelled) { <p class="alert alert-warning">Hoạt động đã hủy. Kết quả được giữ để tra cứu, không dùng để xác nhận tham dự hợp lệ.</p> }
+        @if (Model.FinalizedAt.HasValue && Model.InFinalRoster) {
+            <p><strong>Kết quả: @(Model.Status?.Label() ?? "Chưa có dữ liệu")</strong></p>
+            <p class="text-secondary">Danh sách chốt lúc @Model.FinalizedAt.Value.Vietnam().</p>
+        } else if (Model.FinalizedAt.HasValue) { <p>Đăng ký này không thuộc danh sách điểm danh đã chốt.</p> }
+        else if (Model.CanManage) { <p>Kết quả tạm thời: @((Model.Status ?? AttendanceStatus.Unmarked).Label()). Danh sách chưa chốt.</p> }
+        else { <p>Hoạt động chưa chốt điểm danh. Kết quả sẽ hiển thị sau khi người quản lý chốt danh sách.</p> }
+        @if (Model.CanViewEvent) { <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId">Xem hoạt động</a> }
+        else { <p class="small text-secondary mb-0">Bạn vẫn xem được kết quả của mình khi không còn quyền xem toàn bộ nội dung hoạt động.</p> }
+    </div>
+    <h2 class="h4">@(Model.CanManage ? "Các lần ghi nhận" : "Các lần sửa sau chốt")</h2>
+    <p class="text-secondary">@Model.Count lần · Trang @Model.Page / @Model.Pages · Giờ Việt Nam</p>
+    @if (Model.Items.Count == 0) { <p class="alert alert-light">Chưa có thay đổi để hiển thị.</p> }
+    <ol class="list-unstyled d-grid gap-3">
+        @foreach (var entry in Model.Items) {
+            <li class="card community-card p-4" data-attendance-history-id="@entry.Id">
+                <div class="d-flex flex-wrap justify-content-between gap-2"><h3 class="h5">@(entry.Corrected ? "Sửa sau chốt" : "Ghi điểm danh")</h3><time datetime="@entry.At.ToString("o")">@entry.At.Vietnam()</time></div>
+                <p>@(entry.Before?.Label() ?? "Chưa có kết quả ghi nhận") → @(entry.After?.Label() ?? "Không có dữ liệu trạng thái")</p>
+                <p class="text-secondary text-break mb-0">Người thực hiện: @entry.Actor</p>
+                @if (entry.Reason is not null) { <p class="text-break mt-2 mb-0">Lý do: @entry.Reason</p> }
+            </li>
+        }
+    </ol>
+    @if (Model.Pages > 1) {
+        <nav class="d-flex flex-wrap gap-3 mt-4" aria-label="Phân trang lịch sử điểm danh">
+            @if (Model.Page > 1) { <a asp-action="History" asp-route-id="@Model.RegistrationId" asp-route-page="@(Model.Page-1)" asp-route-returnUrl="@Model.ReturnUrl">Trang trước</a> }
+            @if (Model.Page < Model.Pages) { <a asp-action="History" asp-route-id="@Model.RegistrationId" asp-route-page="@(Model.Page+1)" asp-route-returnUrl="@Model.ReturnUrl">Trang sau</a> }
+        </nav>
+    }
+</section>

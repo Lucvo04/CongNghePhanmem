@@ -1,0 +1,22 @@
+@model StudentClubManagement.Web.ViewModels.Announcements.AnnouncementRecipients
+@{ ViewData["Title"] = "Người nhận thông báo"; }
+<section class="container py-5">
+    <a asp-action="Details" asp-route-id="@Model.Item.Id">← Chi tiết thông báo</a>
+    <p class="eyebrow mt-4">@Model.Item.Club.Name</p><h1 class="h2">Người nhận thông báo</h1><p class="text-break">@Model.Item.Title</p>
+    <p class="text-secondary">Danh sách được giữ tại thời điểm đăng, kể cả khi người nhận rời CLB hoặc hủy đăng ký sau đó. Chỉ người quản lý được xem danh sách này.</p>
+    <p class="small">@Model.Count người nhận · <span data-read-count>@Model.ReadCount</span> đã đọc · Trang @Model.Page / @Model.Pages</p>
+    <div class="row g-3">
+        @foreach (var person in Model.Items)
+        {
+            <div class="col-md-6"><article class="card community-card p-4" data-recipient><h2 class="h6 text-break">@person.Name</h2><p class="small text-secondary text-break">Mã sinh viên: @(person.StudentCode ?? "Chưa cập nhật")</p><p class="small mb-0">@(person.ReadAt.HasValue ? "Đã đọc lúc " + StudentClubManagement.Web.Models.EventLabels.Vietnam(person.ReadAt.Value) : "Chưa đọc")</p></article></div>
+        }
+    </div>
+    @if (Model.Pages > 1)
+    {
+        <nav class="d-flex justify-content-end align-items-center gap-3 mt-4" aria-label="Phân trang người nhận">
+            @if (Model.Page > 1) { <a class="btn btn-outline-secondary" asp-route-id="@Model.Item.Id" asp-route-page="@(Model.Page - 1)">Trang trước</a> }
+            <span>@Model.Page / @Model.Pages</span>
+            @if (Model.Page < Model.Pages) { <a class="btn btn-outline-secondary" asp-route-id="@Model.Item.Id" asp-route-page="@(Model.Page + 1)">Trang sau</a> }
+        </nav>
+    }
+</section>

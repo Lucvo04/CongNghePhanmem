@@ -1,0 +1,86 @@
+@model StudentClubManagement.Web.ViewModels.Announcements.AnnouncementDetails
+@using StudentClubManagement.Web.Models
+@{ ViewData["Title"] = "Chi tiết thông báo"; var item = Model.Item;
+    string ActionLabel(string action) => action switch { "AnnouncementCreated" => "Tạo bản nháp", "AnnouncementUpdated" => "Sửa bản nháp", "AnnouncementPublished" => "Đăng thông báo", "EventNoticePublished" => "Tự động thông báo hoạt động", "AnnouncementArchived" => "Lưu trữ thông báo", _ => "Cập nhật thông báo" };
+}
+<section class="container py-5">
+    @if (Model.ReturnUrl is not null) { <a href="@Model.ReturnUrl">← Quay lại danh sách</a> }
+    else if (Model.CanManage) { <a asp-action="Index" asp-route-clubId="@item.ClubId">← Thông báo CLB</a> }
+    else { <a asp-action="Mine">← Thông báo của tôi</a> }
+    @if (TempData["AnnouncementMessage"] is string message) { <div class="alert alert-success mt-4" role="status">@message</div> }
+    @if (TempData["AnnouncementError"] is string error) { <div class="alert alert-danger mt-4" role="alert">@error</div> }
+    <div class="row g-4 mt-1">
+        <div class="@(Model.CanManage ? "col-lg-8" : "col-lg-10 mx-auto")">
+            <article class="card community-card p-4 p-md-5">
+                <p class="eyebrow text-break">@item.Club.Name</p><h1 class="h2 text-break">@item.Title</h1>
+                <div class="d-flex flex-wrap gap-3 align-items-center my-3"><span class="badge text-bg-light">@item.Status.Label()</span><span class="small text-secondary">@(item.PublishedAt.HasValue ? "Đăng lúc " + EventLabels.Vietnam(item.PublishedAt.Value) : "Tạo lúc " + EventLabels.Vietnam(item.CreatedAt))</span></div>
+                @if (item.Status == AnnouncementStatus.Archived) { <p class="alert alert-secondary">Thông báo đã lưu trữ. Nội dung được giữ để đối chiếu.</p> }
+                <div class="announcement-content">@item.Content</div>
+                @if (item.SourceKey is not null)
+                {
+                    <div class="alert alert-info mt-4 mb-0"><strong>Thông báo tự động từ hoạt động</strong><p class="small mb-0">Nội dung ghi nhận thông tin tại thời điểm gửi.</p>
+                    @if (Model.CanViewEvent) { <a class="d-inline-block mt-2" asp-controller="Events" asp-action="Details" asp-route-id="@item.EventId">Xem trạng thái hoạt động hiện tại</a> }</div>
+                }
+                @if (Model.Receipt is not null)
+                {
+                    <div class="border-top mt-4 pt-4">
+                        @if (Model.Receipt.ReadAt is DateTimeOffset readAt)
+                        { <p class="small text-secondary mb-0" data-own-read>Đã đọc lúc @EventLabels.Vietnam(readAt)</p> }
+                        else
+                        {
+                            <p class="small text-secondary">Thông báo này chưa được đánh dấu đã đọc.</p>
+                            <form asp-action="MarkRead" asp-route-id="@item.Id" method="post">
+                                <input name="returnUrl" type="hidden" value="@Url.Action("Details", new { id = item.Id, returnUrl = Model.ReturnUrl })" />
+                                <button class="btn btn-primary" type="submit">Đánh dấu đã đọc</button>
+                            </form>
+                        }
+                    </div>
+                }
+            </article>
+        </div>
+        @if (Model.CanManage)
+        {
+            <div class="col-lg-4"><aside class="card community-card p-4">
+                <p class="eyebrow">Đối tượng nhận</p><h2 class="h5">@(item.EventId is null ? "Thành viên CLB" : "Người đăng ký hoạt động")</h2>
+                @if (item.Event is not null) { <p class="text-break">@item.Event.Title</p> }
+                @if (item.Status == AnnouncementStatus.Draft)
+                {
+                    <p><strong class="fs-2" data-recipient-count>@Model.Preview!.Count</strong> người nhận dự kiến</p>
+                    <p class="small text-secondary">Danh sách được kiểm tra lại khi đăng. Người tham gia sau thời điểm đăng sẽ không được thêm vào thông báo này.</p>
+                    @if (item.Club.Status == ClubStatus.Active)
+                    {
+                        <a class="btn btn-outline-primary mb-3" asp-action="Edit" asp-route-id="@item.Id">Sửa bản nháp</a>
+                        <form asp-action="ChangeStatus" asp-route-id="@item.Id" method="post">
+                            <input name="RowVersion" type="hidden" value="@Convert.ToBase64String(item.RowVersion)" /><input name="RecipientVersion" type="hidden" value="@Model.Preview.Version" /><input name="Operation" type="hidden" value="Publish" />
+                            <p class="small">Đăng sẽ giữ nguyên nội dung và danh sách người nhận. Nếu cần đính chính, hãy tạo thông báo mới.</p>
+                            <button class="btn btn-primary w-100" type="submit" disabled="@(Model.Preview.Count == 0)">Đăng thông báo</button>
+                        </form>
+                    }
+                    else { <p class="alert alert-info mb-0">CLB không hoạt động, chưa thể đăng thông báo.</p> }
+                }
+                else
+                {
+                    <p><strong class="fs-2" data-recipient-count>@Model.RecipientCount</strong> người trong danh sách đã gửi</p>
+                    <a class="btn btn-outline-primary" asp-action="Recipients" asp-route-id="@item.Id">Xem người nhận</a>
+                    <p class="small text-secondary mt-3">Nội dung đã đăng không chỉnh sửa. Tạo thông báo mới nếu cần đính chính.</p>
+                    @if (item.Club.Status == ClubStatus.Active) { <a class="btn btn-outline-secondary" asp-action="Create" asp-route-clubId="@item.ClubId">Soạn thông báo mới</a> }
+                    @if (item.Status == AnnouncementStatus.Published && item.Club.Status != ClubStatus.Archived)
+                    {
+                        <form asp-action="ChangeStatus" asp-route-id="@item.Id" method="post" class="mt-4">
+                            <input name="RowVersion" type="hidden" value="@Convert.ToBase64String(item.RowVersion)" /><input name="Operation" type="hidden" value="Archive" />
+                            <label for="reason" class="form-label">Lý do lưu trữ</label><textarea id="reason" name="Reason" required maxlength="500" rows="3" class="form-control"></textarea>
+                            <small class="text-secondary">Người nhận vẫn đọc được thông báo sau khi lưu trữ.</small><button class="btn btn-outline-secondary w-100 mt-3" type="submit">Lưu trữ thông báo</button>
+                        </form>
+                    }
+                }
+            </aside></div>
+            <div class="col-12"><div class="card community-card p-4">
+                <h2 class="h5">Lịch sử xử lý</h2><p class="small text-secondary">20 thao tác gần nhất · Giờ Việt Nam</p>
+                @foreach (var entry in Model.History)
+                {
+                    <div class="border-top py-3"><strong>@ActionLabel(entry.Action)</strong><p class="small text-secondary mb-1">@EventLabels.Vietnam(entry.At) · @entry.Actor</p>@if (entry.Reason is not null) { <p class="mb-0 text-break">@entry.Reason</p> }</div>
+                }
+            </div></div>
+        }
+    </div>
+</section>

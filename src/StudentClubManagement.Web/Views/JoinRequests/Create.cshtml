@@ -1,0 +1,34 @@
+@model StudentClubManagement.Web.ViewModels.JoinRequests.CreateJoinRequestViewModel
+@{ ViewData["Title"] = "Đăng ký gia nhập"; }
+<section class="container py-5">
+    <a asp-controller="Clubs" asp-action="Details" asp-route-id="@Model.ClubId">← Trở lại câu lạc bộ</a>
+    <div class="account-details mt-4">
+        <p class="eyebrow">Bắt đầu một kết nối mới</p>
+        <h1 class="h2">Đăng ký gia nhập</h1>
+        <p class="fs-5 text-break">@Model.ClubName</p>
+        <div class="card community-card p-4 p-md-5 mt-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger validation-summary" role="alert"></div>
+            @if (Model.UnavailableReason is not null)
+            {
+                <p class="mb-3">@Model.UnavailableReason</p>
+                <a class="btn btn-primary align-self-start" asp-action="Index">Xem đơn của tôi</a>
+            }
+            else
+            {
+                <p class="text-secondary">Chia sẻ sở thích, điều bạn muốn học hỏi hoặc đóng góp cho CLB. Đơn cần được xét duyệt trước khi bạn trở thành thành viên.</p>
+                <form asp-action="Create" method="post">
+                    <input asp-for="ClubId" type="hidden" />
+                    <label asp-for="Reason" class="form-label fw-semibold"></label>
+                    <textarea asp-for="Reason" class="form-control" rows="6" maxlength="1000" aria-describedby="reason-help reason-error"></textarea>
+                    <p class="small text-secondary mt-2" id="reason-help">Tối đa 1.000 ký tự. Bạn có thể rút đơn khi còn chờ xử lý.</p>
+                    <span asp-validation-for="Reason" class="text-danger d-block" id="reason-error"></span>
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Gửi đơn gia nhập</button>
+                        <a class="btn btn-outline-secondary" asp-controller="Clubs" asp-action="Details" asp-route-id="@Model.ClubId">Hủy</a>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

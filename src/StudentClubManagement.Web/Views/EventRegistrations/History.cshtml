@@ -1,0 +1,40 @@
+@model StudentClubManagement.Web.ViewModels.Events.RegistrationHistory
+@{
+    ViewData["Title"] = "Lịch sử đăng ký";
+    var row = Model.Registration;
+}
+<section class="container py-5">
+    <p class="eyebrow">Hành trình của bạn</p>
+    <h1 class="h2">Lịch sử đăng ký</h1>
+    <a href="@(Model.ReturnUrl ?? Url.Action("Mine"))">← Hoạt động đã đăng ký</a>
+    <div class="card community-card p-4 my-4">
+        <span class="badge text-bg-light align-self-start mb-3">@(row.CancelledAt is null ? "Đã đăng ký" : "Đã hủy đăng ký")</span>
+        <h2 class="h4 text-break">@row.Title</h2>
+        <p class="text-secondary text-break">@row.ClubName</p>
+        <p>Hoạt động: @row.EventStatus.Label()<br />Bắt đầu theo lịch hiện tại: @row.StartsAt.Vietnam()</p>
+        <p class="small text-secondary">Thông tin hoạt động phía trên là thông tin hiện tại. Đăng ký giữ chỗ và kết quả điểm danh được theo dõi riêng.</p>
+        <a class="mb-3" asp-controller="Attendances" asp-action="History" asp-route-id="@row.Id">Xem kết quả điểm danh</a>
+        @if (row.CanView) { <a asp-controller="Events" asp-action="Details" asp-route-id="@row.EventId">Xem hoạt động</a> }
+        else { <p class="small text-secondary mb-0">Bạn vẫn xem được lịch sử của mình; nội dung chi tiết hoạt động hiện không nằm trong quyền truy cập của bạn.</p> }
+    </div>
+    <div class="d-flex flex-wrap justify-content-between gap-2 mb-3"><h2 class="h4 mb-0">Các lần thay đổi</h2><span class="text-secondary">@Model.Count lần · Trang @Model.Page / @Model.Pages · Giờ Việt Nam</span></div>
+    @if (Model.Items.Count == 0) { <p class="alert alert-light">Chưa có nhật ký thay đổi cho đăng ký này.</p> }
+    <ol class="list-unstyled d-grid gap-3">
+        @foreach (var entry in Model.Items) {
+            <li class="card community-card p-4" data-history-id="@entry.Id">
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                    <h3 class="h5 mb-0">@(entry.Action == "EventRegistrationCancelled" ? "Hủy đăng ký" : entry.IsRepeat ? "Đăng ký lại" : "Đăng ký tham gia")</h3>
+                    <time class="text-secondary" datetime="@entry.OccurredAt.ToString("o")">@entry.OccurredAt.Vietnam()</time>
+                </div>
+                <p class="small text-secondary mt-2 mb-0">Thực hiện bởi: @(entry.IsSelf ? "Bạn" : "Người quản lý")</p>
+                @if (entry.Reason is not null) { <p class="text-break mt-2 mb-0">Lý do: @entry.Reason</p> }
+            </li>
+        }
+    </ol>
+    @if (Model.Pages > 1) {
+        <nav class="d-flex flex-wrap gap-3 mt-4" aria-label="Phân trang lịch sử đăng ký">
+            @if (Model.Page > 1) { <a asp-action="History" asp-route-id="@row.Id" asp-route-page="@(Model.Page-1)" asp-route-returnUrl="@Model.ReturnUrl">Trang trước</a> }
+            @if (Model.Page < Model.Pages) { <a asp-action="History" asp-route-id="@row.Id" asp-route-page="@(Model.Page+1)" asp-route-returnUrl="@Model.ReturnUrl">Trang sau</a> }
+        </nav>
+    }
+</section>

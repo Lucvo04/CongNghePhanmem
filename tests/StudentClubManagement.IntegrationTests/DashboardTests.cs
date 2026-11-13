@@ -23,7 +23,7 @@ public class DashboardTests(SqlServerFixture database) : IClassFixture<SqlServer
             var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var admin = new ApplicationUser { Email = email, UserName = email, FullName = "Quản trị kiểm thử" };
             Assert.True((await users.CreateAsync(admin, password)).Succeeded);
-            Assert.True((await users.AddToRolesAsync(admin, [SystemRoles.Admin, SystemRoles.Student])).Succeeded);
+            Assert.True((await users.AddToRoleAsync(admin, SystemRoles.Admin)).Succeeded);
             var student = new ApplicationUser { UserName = "active@example.test", Email = "active@example.test", FullName = "Sinh viên hoạt động", StudentCode = "DASH-A" };
             var disabled = new ApplicationUser { UserName = "disabled@example.test", Email = "disabled@example.test", FullName = "Sinh viên bị khóa", StudentCode = "DASH-B", Status = UserStatus.Disabled };
             foreach (var user in new[] { student, disabled })

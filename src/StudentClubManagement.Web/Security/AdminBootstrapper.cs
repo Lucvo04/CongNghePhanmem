@@ -31,13 +31,13 @@ public class AdminBootstrapper(ApplicationDbContext db, UserManager<ApplicationU
 
         // Cùng transaction để không tạo tài khoản dở dang hoặc hai quản trị viên đầu tiên.
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
-        var adminRole = await db.Roles.SingleOrDefaultAsync(r => r.NormalizedName == "ADMIN");
+        var adminRole = await db.Roles.SingleOrDefaultAsync(r => r.Name == SystemRoles.Admin);
         if (adminRole is null)
         {
             return Failure("MissingRole", "Chưa có role Admin. Hãy áp dụng migration trước.");
         }
 
-        if (await db.UserRoles.AnyAsync(r => r.RoleId == adminRole.Id))
+        if (await db.Users.AnyAsync(r => r.RoleId == adminRole.Id))
         {
             return Failure("AdminAlreadyExists", "Đã có quản trị viên. Lệnh khởi tạo không đổi mật khẩu, không cấp thêm quyền.");
         }

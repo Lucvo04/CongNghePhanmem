@@ -1,0 +1,42 @@
+@model int
+@inject StudentClubManagement.Web.Security.ClubAccessService ClubAccess
+@using StudentClubManagement.Web.Security
+@using System.Security.Claims
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var admin = User.IsInRole(SystemRoles.Admin);
+    string? Current(string name, string? page = null) => controller == name && (page is null || action == page) ? "page" : null;
+}
+<aside class="offcanvas offcanvas-start personal-menu" tabindex="-1" id="personal-menu" aria-labelledby="personal-menu-title">
+    <div class="offcanvas-header personal-menu-heading">
+        <div><p>VINHUNI CLUBS</p><h2 class="offcanvas-title" id="personal-menu-title">Không gian cá nhân</h2></div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Đóng menu cá nhân"></button>
+    </div>
+    <div class="offcanvas-body">
+        <nav aria-label="Điều hướng cá nhân">
+            @if (admin)
+            {
+                <p class="personal-menu-group">ĐIỀU HÀNH</p>
+                <a class="personal-menu-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><span aria-hidden="true">▦</span>Quản trị</a>
+            }
+            else if (User.IsInRole(SystemRoles.Student))
+            {
+                <p class="personal-menu-group">CÂU LẠC BỘ</p>
+                <a class="personal-menu-link" asp-area="" asp-controller="Announcements" asp-action="Mine" aria-current="@Current("Announcements", "Mine")" aria-label="Thông báo, @Model chưa đọc"><span aria-hidden="true">✉</span>Thông báo <span class="badge rounded-pill text-bg-primary ms-auto" data-unread-count="@Model">@(Model > 99 ? "99+" : Model.ToString())</span></a>
+                <a class="personal-menu-link" asp-area="" asp-controller="JoinRequests" asp-action="Index" aria-current="@Current("JoinRequests")"><span aria-hidden="true">▤</span>Đơn của tôi</a>
+                <a class="personal-menu-link" asp-area="" asp-controller="ClubProposals" asp-action="Index" aria-current="@Current("ClubProposals")"><span aria-hidden="true">＋</span>Thành lập CLB</a>
+                @if (await ClubAccess.IsManagerAsync(User.FindFirstValue(ClaimTypes.NameIdentifier)!))
+                {
+                    <a class="personal-menu-link" asp-area="" asp-controller="ClubManagement" asp-action="Index" aria-current="@Current("ClubManagement")"><span aria-hidden="true">◇</span>CLB tôi quản lý</a>
+                }
+            }
+            <p class="personal-menu-group">TÀI KHOẢN</p>
+            <a class="personal-menu-link" asp-area="" asp-controller="Account" asp-action="Overview" aria-current="@(controller == "Account" && action != "ChangePassword" ? "page" : null)"><span aria-hidden="true">◎</span>Tài khoản</a>
+            <a class="personal-menu-link" asp-area="" asp-controller="Account" asp-action="ChangePassword" aria-current="@Current("Account", "ChangePassword")"><span aria-hidden="true">⚿</span>Đổi mật khẩu</a>
+        </nav>
+        <div class="personal-menu-bottom">
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post"><button class="personal-menu-link w-100" type="submit"><span aria-hidden="true">↪</span>Đăng xuất</button></form>
+        </div>
+    </div>
+</aside>

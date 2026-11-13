@@ -1,6 +1,10 @@
+> Cập nhật 09/11/2026: Users.RoleId nối trực tiếp Roles; đã bỏ UserRoles và các cột xác minh chưa dùng. Sinh viên tự đăng ký, Admin duyệt; Pending/Rejected/Disabled không đăng nhập được. Chủ nhiệm là Membership Manager, menu chỉ hiện cho chủ nhiệm hợp lệ. Xem [SQL hiện tại](simple-database.md) và [luồng duyệt](approval-workflows.md). Các mô tả cấp tài khoản/ba bảng bên dưới ghi lại phiên bản trước.
+
 # Bước 3–4 — Xác thực và quyền hệ thống
 
-Ngày triển khai: 30/10/2026. Phần việc trong Sprint 1: đăng nhập/đăng xuất, quyền hệ thống và đổi mật khẩu chạy từ form đến database. Không tạo thêm template quản trị; dùng chung layout Bootstrap, chỉ có trang chức năng đã triển khai.
+Ngày triển khai ban đầu: 30/10/2026. Phần việc trong Sprint 1: đăng nhập/đăng xuất, quyền hệ thống và đổi mật khẩu chạy từ form đến database. Giao diện Admin đã tách layout ở bước 9.
+
+Cập nhật 02/11/2026: lưu trữ Identity rút gọn còn `Users`, `Roles`, `UserRoles`, dùng `CoreUserStore`/`CoreRoleStore` với EF và Identity của Microsoft. Không công bố khả năng claims tùy chỉnh, external login, token hoặc 2FA. Luồng cookie, vai trò và kiểm tra mật khẩu bên dưới giữ nguyên. Xem [database rút gọn](simple-database.md); bộ kiểm thử hiện tại có 150 ca đạt.
 
 ## Luồng người dùng
 

@@ -158,7 +158,7 @@ public class PersonalProfileTests(SqlServerFixture database) : IClassFixture<Sql
         fields["FullName"] = before.FullName; fields["PhoneNumber"] = before.PhoneNumber!;
         fields["ClassName"] = before.ClassName!; fields["Faculty"] = before.Faculty!;
         Assert.Equal(HttpStatusCode.Redirect, (await PostAsync(client, fields)).StatusCode);
-        var after = await ReadAsync(user.Id); Assert.Equal(before.ConcurrencyStamp, after.ConcurrencyStamp); Assert.True(after.PhoneNumberConfirmed);
+        var after = await ReadAsync(user.Id); Assert.Equal(before.ConcurrencyStamp, after.ConcurrencyStamp); Assert.False(after.PhoneNumberConfirmed);
         await using var db = database.CreateContext(); Assert.False(await db.AuditLogs.AnyAsync(x => x.ActorId == user.Id));
     }
 

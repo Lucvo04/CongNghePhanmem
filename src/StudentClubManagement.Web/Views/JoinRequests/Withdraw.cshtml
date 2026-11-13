@@ -1,0 +1,23 @@
+@model StudentClubManagement.Web.ViewModels.JoinRequests.WithdrawJoinRequestViewModel
+@{ ViewData["Title"] = "Rút đơn gia nhập"; }
+<section class="container py-5">
+    <a asp-action="Index">← Đơn của tôi</a>
+    <div class="account-details mt-4">
+        <h1 class="h2">Rút đơn gia nhập</h1>
+        <p class="fs-5 text-break">@Model.ClubName</p>
+        <div class="card community-card p-4 p-md-5">
+            <div asp-validation-summary="All" class="text-danger validation-summary" role="alert"></div>
+            <h2 class="h6">Lý do đã gửi</h2><p class="club-description text-break">@Model.Reason</p>
+            @if (Model.Status == JoinRequestStatus.Pending)
+            {
+                <p>Bạn muốn rút đơn này? Đơn sẽ được lưu với trạng thái Đã rút. Nếu muốn tham gia sau đó, bạn cần gửi một đơn mới.</p>
+                <form asp-action="Withdraw" asp-route-id="@Model.Id" method="post">
+                    <input asp-for="RowVersion" type="hidden" />
+                    <div class="d-flex flex-wrap gap-2"><button type="submit" class="btn btn-danger">Xác nhận rút đơn</button><a class="btn btn-outline-secondary" asp-action="Index">Giữ đơn</a><a class="btn btn-link" asp-action="Withdraw" asp-route-id="@Model.Id">Tải lại</a></div>
+                </form>
+            }
+            else
+            { <p>Đơn này không còn chờ xử lý. Trạng thái hiện tại: @Model.Status.Label().</p><a asp-action="Index">Trở lại danh sách đơn</a> }
+        </div>
+    </div>
+</section>

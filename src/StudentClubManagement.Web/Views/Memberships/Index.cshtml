@@ -1,0 +1,40 @@
+@model StudentClubManagement.Web.ViewModels.Memberships.MemberListViewModel
+@{ var own = Model.ClubId is null; ViewData["Title"] = own ? "CLB của tôi" : "Thành viên CLB"; var action = own ? "Mine" : "Index"; }
+<section class="container py-5">
+    <a asp-controller="@(own ? "Account" : "ClubManagement")" asp-action="@(own ? "Overview" : "Index")">← @(own ? "Tài khoản của tôi" : "CLB tôi quản lý")</a>
+    <p class="eyebrow mt-4">Cộng đồng và thành viên</p><h1 class="h2">@ViewData["Title"]</h1>
+    <p class="text-secondary">@(own ? "Theo dõi tư cách thành viên và các đợt tham gia của bạn." : Model.ClubName)</p>
+    @if (Model.ClubStatus == ClubStatus.Archived) { <div class="alert alert-info">CLB đã lưu trữ. Danh sách và lịch sử chỉ được xem.</div> }
+    <form asp-action="@action" method="get" class="card community-card p-4 my-4">
+        @if (!own) { <input type="hidden" name="clubId" value="@Model.ClubId" /> }
+        <div class="row g-3 align-items-end">
+            @if (!own) { <div class="col-md-6"><label for="search" class="form-label">Tên hoặc mã sinh viên</label><input id="search" name="search" value="@Model.Search" maxlength="150" class="form-control" /></div> }
+            <div class="col-md"><label for="status" class="form-label">Trạng thái</label><select id="status" name="status" class="form-select">
+                <option value="current" selected="@(Model.Status == "current")">Hiện tại (chưa rời)</option>
+                <option value="all" selected="@(Model.Status == "all")">Tất cả các đợt</option>
+                @foreach (var status in Enum.GetValues<MembershipStatus>()) { <option value="@status.ToString().ToLowerInvariant()" selected="@(Model.Status == status.ToString().ToLowerInvariant() || Model.Status == ((int)status).ToString())">@status.Label()</option> }
+            </select></div>
+            <div class="col-md-auto"><button type="submit" class="btn btn-primary">Tìm kiếm</button> <a class="btn btn-outline-secondary" asp-action="@action" asp-route-clubId="@Model.ClubId">Bỏ lọc</a></div>
+        </div>
+    </form>
+    <p class="small text-secondary">@Model.TotalCount đợt tham gia · Trang @Model.Page / @Model.TotalPages</p>
+    @if (Model.Members.Count == 0) { <div class="card community-card p-4">Chưa có kết quả phù hợp. Hãy kiểm tra bộ lọc hoặc đơn gia nhập.</div> }
+    <div class="row g-3">
+    @foreach (var item in Model.Members)
+    {
+        <div class="col-lg-6"><article class="card community-card h-100 p-4">
+            <div class="d-flex flex-wrap justify-content-between gap-2 mb-3"><span class="badge @(item.Status == MembershipStatus.Active ? "text-bg-success" : item.Status == MembershipStatus.Suspended ? "text-bg-warning" : "text-bg-secondary")">@item.Status.Label()</span><span class="small">@(item.Role == ClubRole.Manager ? "Chủ nhiệm" : "Thành viên")</span></div>
+            <h2 class="h5 text-break">@(own ? item.ClubName : item.FullName)</h2>
+            @if (!own) { <p class="small text-secondary">Mã SV: @(item.StudentCode ?? "Chưa cập nhật") · Lớp: @(item.ClassName ?? "Chưa cập nhật")</p> }
+            <p class="small text-secondary">Tham gia từ @item.JoinedAt.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy")</p>
+            @if (item.EndedAt is DateTimeOffset ended) { <p class="small text-secondary">Kết thúc @ended.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy")</p> }
+            <a class="btn btn-outline-primary align-self-start mt-auto" asp-action="Details" asp-route-id="@item.Id" aria-label="Chi tiết @(own ? item.ClubName : item.FullName)">Chi tiết và lịch sử</a>
+        </article></div>
+    }
+    </div>
+    @if (Model.TotalPages > 1) { <nav class="d-flex gap-3 align-items-center mt-4" aria-label="Phân trang thành viên">
+        @if (Model.Page > 1) { <a asp-action="@action" asp-route-clubId="@Model.ClubId" asp-route-search="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page - 1)">Trang trước</a> }
+        <span>@Model.Page / @Model.TotalPages</span>
+        @if (Model.Page < Model.TotalPages) { <a asp-action="@action" asp-route-clubId="@Model.ClubId" asp-route-search="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page + 1)">Trang sau</a> }
+    </nav> }
+</section>

@@ -1,0 +1,68 @@
+@model StudentClubManagement.Web.ViewModels.Events.EventDetails
+@using StudentClubManagement.Web.Controllers
+@{ var item = Model.Item; ViewData["Title"] = item.Title; var stamp = Convert.ToBase64String(item.RowVersion); }
+<section class="container py-5">
+    @if (ViewData["CalendarReturnUrl"] is string calendarUrl) { <a class="d-inline-block me-3" href="@calendarUrl">← Lịch hoạt động đã lọc</a> }
+    @if (Model.CanManage) { <a asp-action="Index" asp-route-clubId="@item.ClubId">← Quản lý hoạt động</a> } else { <a asp-controller="Clubs" asp-action="Details" asp-route-id="@item.ClubId">← Thông tin CLB</a> }
+    @if (TempData["EventMessage"] is string message) { <div class="alert alert-success mt-3" role="status">@message</div> }
+    @if (TempData["EventError"] is string error) { <div class="alert alert-danger mt-3" role="alert">@error</div> }
+    <div class="row g-4 mt-2"><div class="col-lg-8"><article class="card community-card p-4 p-md-5">
+        <p class="eyebrow text-break">@item.Club.Name</p><div class="d-flex gap-2 flex-wrap mb-3"><span class="badge @(item.Status == EventStatus.Cancelled ? "text-bg-danger" : "text-bg-light")">@item.Status.Label()</span><span class="badge text-bg-light">@item.Audience.Label()</span></div>
+        <h1 class="h2 text-break">@item.Title</h1><p class="text-secondary">Giờ Việt Nam (UTC+7)</p>
+        <dl class="row mt-4"><dt class="col-sm-4">Bắt đầu</dt><dd class="col-sm-8">@item.StartsAt.Vietnam()</dd><dt class="col-sm-4">Kết thúc</dt><dd class="col-sm-8">@item.EndsAt.Vietnam()</dd><dt class="col-sm-4">Hạn đăng ký</dt><dd class="col-sm-8">@item.RegistrationDeadline.Vietnam()</dd><dt class="col-sm-4">Địa điểm</dt><dd class="col-sm-8 text-break">@item.Location</dd><dt class="col-sm-4">Số người tối đa</dt><dd class="col-sm-8">@item.Capacity</dd></dl>
+        @if (item.Status == EventStatus.Cancelled) { <p class="alert alert-warning">Hoạt động đã hủy. Thông tin được giữ để tra cứu lịch sử.</p> }
+        <h2 class="h5 mt-3">Về hoạt động</h2><p class="text-break" style="white-space: pre-wrap">@(string.IsNullOrWhiteSpace(item.Description) ? "Chưa có nội dung chi tiết." : item.Description)</p>
+        <section class="border-top pt-4 mt-3" aria-label="Đăng ký tham gia">
+            <h2 class="h5">Tham gia hoạt động</h2>
+            <p>@Model.Registration.Count / @item.Capacity người đăng ký</p>
+            <p>@Model.Registration.Message</p>
+            @if (Model.Registration.CanRegister) {
+                <form asp-controller="EventRegistrations" asp-action="Register" asp-route-eventId="@item.Id" method="post">
+                    <input type="hidden" name="EventVersion" value="@stamp" />
+                    <input type="hidden" name="RowVersion" value="@(Model.Registration.Own is null ? "" : Convert.ToBase64String(Model.Registration.Own.RowVersion))" />
+                    <button class="btn btn-primary">Đăng ký tham gia</button>
+                </form>
+            }
+            @if (Model.Registration.CanCancel) {
+                <p class="small text-secondary">Có thể tự hủy trước giờ bắt đầu, kể cả đã hết hạn đăng ký.</p>
+                <form asp-controller="EventRegistrations" asp-action="Cancel" asp-route-id="@Model.Registration.Own!.Id" method="post">
+                    <input type="hidden" name="RowVersion" value="@Convert.ToBase64String(Model.Registration.Own!.RowVersion)" />
+                    <button class="btn btn-outline-danger">Hủy đăng ký tham gia</button>
+                </form>
+            }
+            @if (User.Identity?.IsAuthenticated != true && item.Status == EventStatus.Published) {
+                <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Events", new { id = item.Id })">Đăng nhập để tham gia</a>
+            }
+        </section>
+    </article></div>
+    @if (Model.CanManage) { <aside class="col-lg-4"><div class="card community-card p-4"><h2 class="h5">Điều hành hoạt động</h2>
+        <a class="btn btn-outline-primary mb-3" asp-controller="EventRegistrations" asp-action="Index" asp-route-eventId="@item.Id">Danh sách đăng ký</a>
+        <a class="btn btn-outline-primary mb-3" asp-controller="Attendances" asp-action="Index" asp-route-eventId="@item.Id">Điểm danh</a>
+        @if (EventsController.Editable(item)) { <a class="btn btn-outline-primary mb-3" asp-action="Edit" asp-route-id="@item.Id">Sửa hoạt động</a> }
+        @if (item.Club.Status != ClubStatus.Archived) {
+            @if (item.Status == EventStatus.Draft && item.Club.Status == ClubStatus.Active) {
+                <p class="small text-secondary">Kiểm tra lịch, địa điểm và đối tượng trước khi công bố.</p><form asp-action="ChangeStatus" asp-route-id="@item.Id" method="post" class="mb-3"><input type="hidden" name="RowVersion" value="@stamp" /><input type="hidden" name="Operation" value="Publish" /><button class="btn btn-primary w-100">Công bố hoạt động</button></form>
+            }
+            @if (item.Status == EventStatus.Published && item.EndsAt <= DateTimeOffset.UtcNow) {
+                <form asp-action="ChangeStatus" asp-route-id="@item.Id" method="post" class="mb-3"><input type="hidden" name="RowVersion" value="@stamp" /><input type="hidden" name="Operation" value="Complete" /><button class="btn btn-primary w-100">Đánh dấu hoàn thành</button></form>
+            }
+            @if (item.Status is EventStatus.Draft or EventStatus.Published) {
+                <details class="border-top pt-3"><summary>Hủy hoạt động</summary><form asp-action="ChangeStatus" asp-route-id="@item.Id" method="post" class="mt-3"><input type="hidden" name="RowVersion" value="@stamp" /><input type="hidden" name="Operation" value="Cancel" /><label for="cancel-reason" class="form-label">Lý do hủy</label><textarea id="cancel-reason" name="Reason" maxlength="500" required rows="3" class="form-control mb-3"></textarea><p class="small text-secondary">Thao tác này kết thúc hoạt động và giữ lịch sử; không thể công bố lại. Với hoạt động đã công bố, người còn đăng ký sẽ nhận thông báo hủy kèm lý do.</p><button class="btn btn-outline-danger w-100">Xác nhận hủy hoạt động</button></form></details>
+            }
+        }
+        @if (item.Status is EventStatus.Completed or EventStatus.Cancelled || item.Club.Status == ClubStatus.Archived) { <p class="text-secondary">Chỉ xem lịch sử, không sửa hoặc xóa hoạt động.</p> }
+    </div></aside> }
+    </div>
+    @if (Model.CanManage)
+    {
+        <section class="card community-card p-4 mt-4"><h2 class="h5">Thông báo tự động gần nhất</h2><p class="small text-secondary">Tối đa 5 lần đổi lịch hoặc hủy. Mỗi thông báo giữ danh sách người nhận tại thời điểm thay đổi.</p>
+            @if (Model.Notices.Count == 0) { <p class="mb-0 text-secondary">Chưa có thông báo tự động cho hoạt động này.</p> }
+            @foreach (var notice in Model.Notices)
+            { <div class="border-top py-3" data-event-notice="@notice.Id"><a class="fw-semibold text-break" asp-controller="Announcements" asp-action="Details" asp-route-id="@notice.Id" asp-route-returnUrl="@Url.Action("Details", new { id = item.Id })">@notice.Title</a><p class="small text-secondary mb-0">@notice.PublishedAt.Vietnam() · @notice.Recipients người nhận</p></div> }
+        </section>
+    }
+    @if (Model.CanManage) { <section class="card community-card p-4 mt-4"><h2 class="h5">Lịch sử thao tác gần nhất</h2><p class="text-secondary small">Hiển thị tối đa 20 thao tác. Nhật ký đầy đủ vẫn được lưu.</p><ol class="mb-0">@foreach (var log in Model.History) {
+        var label = log.Action switch { "EventCreated" => "Tạo bản nháp", "EventUpdated" => "Sửa hoạt động", "EventPublished" => "Công bố", "EventCancelled" => "Hủy hoạt động", "EventCompleted" => "Hoàn thành", "AttendanceFinalized" => "Chốt điểm danh", _ => log.Action };
+        <li class="mb-3 text-break"><strong>@label</strong> · @log.Actor · @log.At.Vietnam() @if (log.Reason is not null) { <p class="mb-0">Lý do: @log.Reason</p> }</li>
+    }</ol></section> }
+</section>

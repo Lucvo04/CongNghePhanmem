@@ -1,0 +1,22 @@
+@model StudentClubManagement.Web.ViewModels.Events.EventList
+@{ ViewData["Title"] = "Quản lý hoạt động"; }
+<section class="container py-5">
+    <a asp-controller="ClubManagement" asp-action="Index">← CLB tôi quản lý</a>
+    <a class="d-inline-block ms-3" asp-action="Calendar" asp-route-ClubId="@Model.Club.Id">Xem lịch của CLB</a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 my-4"><div><p class="eyebrow">@Model.Club.Name</p><h1 class="h2">Quản lý hoạt động</h1><p class="text-secondary">Lên kế hoạch và theo dõi hoạt động của câu lạc bộ.</p></div>
+    @if (Model.Club.Status == ClubStatus.Active) { <a class="btn btn-primary" asp-action="Create" asp-route-clubId="@Model.Club.Id">Tạo hoạt động</a> }</div>
+    <form method="get" asp-action="Index" class="card community-card p-4 mb-4">
+        <input type="hidden" name="clubId" value="@Model.Club.Id" />
+        <div class="row g-3 align-items-end"><div class="col-md-6"><label for="search" class="form-label">Tên hoạt động</label><input id="search" name="search" value="@Model.Search" maxlength="180" class="form-control" /></div>
+        <div class="col-md-4"><label for="status" class="form-label">Trạng thái</label><select id="status" name="status" class="form-select"><option value="">Tất cả trạng thái</option>@foreach(var status in Enum.GetValues<EventStatus>()) { <option value="@((int)status)" selected="@(Model.Status == status)">@status.Label()</option> }</select></div><div class="col-md-2"><button class="btn btn-primary w-100">Lọc</button></div></div>
+    </form>
+    <p>@Model.Count hoạt động · Giờ Việt Nam (UTC+7)</p>
+    @if (Model.Items.Count == 0) { <div class="card community-card p-4">Chưa có hoạt động phù hợp. Bạn có thể tạo bản nháp hoặc thay đổi bộ lọc.</div> }
+    <div class="row g-4">@foreach (var item in Model.Items) {
+        <div class="col-md-6"><article class="card community-card h-100 p-4"><div class="d-flex flex-wrap gap-2 mb-3"><span class="badge text-bg-light">@item.Status.Label()</span><span class="small text-secondary">@item.Audience.Label()</span></div><h2 class="h4 text-break">@item.Title</h2><p>@item.StartsAt.Vietnam() — @item.EndsAt.Vietnam()</p><p class="text-break">@item.Location</p><a class="btn btn-outline-primary mt-auto" asp-action="Details" asp-route-id="@item.Id">Chi tiết hoạt động</a></article></div>
+    }</div>
+    @if (Model.Pages > 1) { <nav class="d-flex flex-wrap gap-3 align-items-center mt-4" aria-label="Phân trang hoạt động">
+    @if (Model.Page > 1) { <a asp-action="Index" asp-route-clubId="@Model.Club.Id" asp-route-search="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page-1)">Trang trước</a> }
+    <span>@Model.Page / @Model.Pages</span>
+    @if (Model.Page < Model.Pages) { <a asp-action="Index" asp-route-clubId="@Model.Club.Id" asp-route-search="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page+1)">Trang sau</a> }</nav> }
+</section>

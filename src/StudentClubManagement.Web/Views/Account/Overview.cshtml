@@ -21,7 +21,7 @@
                     <dd class="col-sm-8 text-break">@Model.StudentCode</dd>
                 }
                 <dt class="col-sm-4">Quyền hệ thống</dt>
-                <dd class="col-sm-8">@(Model.IsAdmin ? "Quản trị viên" : "Người dùng")</dd>
+                <dd class="col-sm-8">@(Model.IsAdmin ? "Quản trị viên" : "Sinh viên")</dd>
                 <dt class="col-sm-4">Số điện thoại</dt>
                 <dd class="col-sm-8 text-break">@(Model.PhoneNumber ?? "Chưa cập nhật")</dd>
                 <dt class="col-sm-4">Lớp</dt>
@@ -32,6 +32,12 @@
             <div class="d-flex flex-column flex-sm-row flex-wrap gap-3 mt-4">
                 <a class="btn btn-primary" asp-area="" asp-controller="Account" asp-action="EditProfile">Chỉnh sửa hồ sơ</a>
                 <a class="btn btn-outline-secondary" asp-area="" asp-controller="Account" asp-action="ChangePassword">Đổi mật khẩu</a>
+                @if (!Model.IsAdmin && User.IsInRole(StudentClubManagement.Web.Security.SystemRoles.Student))
+                {
+                    <a class="btn btn-outline-primary" asp-area="" asp-controller="Memberships" asp-action="Mine">CLB của tôi</a>
+                    <a class="btn btn-outline-primary" asp-area="" asp-controller="EventRegistrations" asp-action="Mine">Hoạt động đã đăng ký</a>
+                    <a class="btn btn-outline-primary" asp-area="" asp-controller="Announcements" asp-action="Mine">Thông báo của tôi</a>
+                }
                 @if (Model.IsAdmin)
                 {
                     <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Vào khu vực quản trị</a>

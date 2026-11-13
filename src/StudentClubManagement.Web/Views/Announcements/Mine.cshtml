@@ -1,0 +1,53 @@
+@model StudentClubManagement.Web.ViewModels.Announcements.AnnouncementInbox
+@using StudentClubManagement.Web.Models
+@using StudentClubManagement.Web.ViewModels.Announcements
+@{ ViewData["Title"] = "Thông báo của tôi"; ViewData["ActiveNav"] = "Inbox";
+    var returnUrl = Url.Action("Mine", new { search = Model.Search, clubId = Model.ClubId, status = Model.Status, page = Model.Page });
+}
+<section class="container py-5">
+    <a asp-controller="Account" asp-action="Overview">← Tài khoản</a>
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 my-4">
+        <div><p class="eyebrow">Không gian cá nhân</p><h1 class="h2">Thông báo của tôi</h1><p class="text-secondary mb-0">Theo dõi những thông tin được gửi đến bạn từ các câu lạc bộ.</p></div>
+        <a class="btn btn-outline-primary flex-shrink-0" asp-action="Mine" asp-route-status="Unread"><strong data-inbox-unread>@Model.UnreadCount</strong> chưa đọc</a>
+    </div>
+    @if (TempData["AnnouncementMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
+    @if (TempData["AnnouncementError"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }
+    <form asp-action="Mine" method="get" class="card community-card p-4 mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-4"><label for="search" class="form-label">Tìm tiêu đề</label><input id="search" name="search" value="@Model.Search" maxlength="180" class="form-control" /></div>
+            <div class="col-md-6 col-lg-3"><label for="clubId" class="form-label">Câu lạc bộ</label><select id="clubId" name="clubId" class="form-select"><option value="">Tất cả CLB đã gửi</option>@foreach (var club in Model.Clubs) { <option value="@club.Id" selected="@(Model.ClubId == club.Id)">@club.Name</option> }</select></div>
+            <div class="col-md-6 col-lg-2"><label for="status" class="form-label">Trạng thái đọc</label><select id="status" name="status" class="form-select"><option value="0" selected="@(Model.Status == InboxStatus.All)">Tất cả</option><option value="1" selected="@(Model.Status == InboxStatus.Unread)">Chưa đọc</option><option value="2" selected="@(Model.Status == InboxStatus.Read)">Đã đọc</option></select></div>
+            <div class="col-lg-3 d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">Lọc thông báo</button><a class="btn btn-outline-secondary" asp-action="Mine">Bỏ lọc</a></div>
+        </div>
+    </form>
+    <p class="small text-secondary">@Model.Count thông báo phù hợp · Trang @Model.Page / @Model.Pages · Số chưa đọc phía trên tính toàn bộ hộp thông báo.</p>
+    @if (Model.Count == 0)
+    {
+        <div class="card community-card p-4 p-md-5 text-center"><h2 class="h5">Chưa có thông báo phù hợp</h2><p class="mb-0 text-secondary">Thông báo sẽ xuất hiện khi CLB gửi đến bạn. Nếu đang lọc, hãy thử bỏ bộ lọc.</p></div>
+    }
+    <div class="row g-3">
+        @foreach (var item in Model.Items)
+        {
+            <div class="col-lg-6"><article class="card community-card p-4 h-100 @(item.ReadAt is null ? "inbox-unread" : "")" data-inbox-id="@item.Id">
+                <div class="d-flex flex-wrap gap-2 align-items-center mb-3"><span class="badge @(item.ReadAt is null ? "text-bg-primary" : "text-bg-light")">@(item.ReadAt is null ? "Chưa đọc" : "Đã đọc")</span>@if (item.Archived) { <span class="badge text-bg-light">Đã lưu trữ</span> }<small class="text-secondary ms-sm-auto">@EventLabels.Vietnam(item.PublishedAt)</small></div>
+                <p class="eyebrow text-break">@item.ClubName</p><h2 class="h5 text-break mb-4">@item.Title</h2>
+                <div class="d-flex flex-wrap gap-2 mt-auto">
+                    <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="@returnUrl">Xem thông báo</a>
+                    @if (item.ReadAt is null)
+                    {
+                        <form asp-action="MarkRead" asp-route-id="@item.Id" method="post"><input name="returnUrl" type="hidden" value="@returnUrl" /><button class="btn btn-outline-secondary" type="submit">Đánh dấu đã đọc</button></form>
+                    }
+                    else { <small class="text-secondary align-self-center">Đọc lúc @EventLabels.Vietnam(item.ReadAt.Value)</small> }
+                </div>
+            </article></div>
+        }
+    </div>
+    @if (Model.Pages > 1)
+    {
+        <nav class="d-flex justify-content-end align-items-center gap-3 mt-4" aria-label="Phân trang hộp thông báo">
+            @if (Model.Page > 1) { <a class="btn btn-outline-secondary" asp-action="Mine" asp-route-search="@Model.Search" asp-route-clubId="@Model.ClubId" asp-route-status="@Model.Status" asp-route-page="@(Model.Page - 1)">Trang trước</a> }
+            <span>@Model.Page / @Model.Pages</span>
+            @if (Model.Page < Model.Pages) { <a class="btn btn-outline-secondary" asp-action="Mine" asp-route-search="@Model.Search" asp-route-clubId="@Model.ClubId" asp-route-status="@Model.Status" asp-route-page="@(Model.Page + 1)">Trang sau</a> }
+        </nav>
+    }
+</section>

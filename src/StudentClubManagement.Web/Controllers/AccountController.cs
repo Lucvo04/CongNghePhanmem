@@ -10,8 +10,32 @@ namespace StudentClubManagement.Web.Controllers;
 
 [Authorize]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-public class AccountController(UserManager<ApplicationUser> users, SignInManager<ApplicationUser> signIn, PersonalProfileService profiles) : Controller
+public class AccountController(UserManager<ApplicationUser> users, SignInManager<ApplicationUser> signIn, PersonalProfileService profiles,
+    StudentRegistrationService registrations) : Controller
 {
+    [AllowAnonymous, HttpGet]
+    public IActionResult Register() => User.Identity?.IsAuthenticated == true ? RedirectToAction(nameof(Overview)) : View(new StudentRegistrationForm());
+
+    [AllowAnonymous, HttpPost]
+    public async Task<IActionResult> Register(StudentRegistrationForm model)
+    {
+        if (User.Identity?.IsAuthenticated == true) return Forbid();
+        model.Normalize();
+        ModelState.Clear();
+        if (TryValidateModel(model))
+        {
+            var result = await registrations.RegisterAsync(model);
+            if (result.Succeeded)
+            {
+                TempData["AccountNotice"] = "Đã gửi đăng ký. Tài khoản cần được Admin duyệt trước khi đăng nhập. Mật khẩu là mật khẩu bạn vừa đặt.";
+                return RedirectToAction(nameof(Login));
+            }
+            ModelState.AddModelError("", result.Message);
+        }
+        ModelState.SetModelValue(nameof(model.Password), "", ""); ModelState.SetModelValue(nameof(model.ConfirmPassword), "", "");
+        model.Password = model.ConfirmPassword = "";
+        return View(model);
+    }
     public const string LoginFailureMessage = "Không thể đăng nhập. Vui lòng kiểm tra thông tin hoặc thử lại sau. Nếu vẫn gặp lỗi, hãy liên hệ quản trị viên.";
 
     [AllowAnonymous, HttpGet]

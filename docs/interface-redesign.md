@@ -59,3 +59,15 @@ Các điểm nhóm trưởng cần review:
 5. Kiểm tra danh mục và các form hiện có trên điện thoại. Bảng rộng được cuộn trong vùng riêng.
 
 Kiểm thử tự động và trình duyệt được ghi tại `docs/implementation-log.md`. Ảnh dashboard trong `.local/qa/vinh-*` dùng dữ liệu QA giả, không phải thống kê hoạt động thực của trường. Chưa đánh dấu Sprint Review/UAT hoàn tất thay cho nhóm.
+
+## Điều hướng tối giản — 13/11/2026
+
+Theo yêu cầu nhóm trưởng, thanh điều hướng công khai chỉ còn **Trang chủ, Câu lạc bộ, Lịch hoạt động, Giới thiệu**. Máy tính hiển thị cùng hàng với logo; điện thoại hiển thị bốn liên kết trên một hàng riêng bên dưới logo để luôn dễ truy cập.
+
+Khi đăng nhập, chọn nút **Cá nhân** để mở menu trượt bên trái theo màu khu vực quản trị. Mặc định menu đóng. Đóng bằng nút X, Escape hoặc bấm vùng ngoài; chọn liên kết sẽ chuyển trang và menu trở về trạng thái đóng. Menu có Thông báo, Đơn của tôi, Thành lập CLB, Tài khoản, Đổi mật khẩu, Đăng xuất. **CLB tôi quản lý** chỉ hiện cho Student đang là chủ nhiệm hợp lệ; Admin ở trang công khai có lối vào Quản trị và vẫn dùng sidebar Admin ở khu vực quản lý.
+
+Số chưa đọc nằm trong menu. Khi có thông báo chưa đọc, nút Cá nhân có chấm xanh và nhãn cho trình đọc màn hình ghi số lượng; khi không còn thông báo chưa đọc, chấm biến mất. Khách vẫn có nút Đăng nhập. CLB đã tham gia và hoạt động đã đăng ký tiếp tục truy cập trong trang Tài khoản.
+
+Code: `_Layout.cshtml` giữ khung và bốn liên kết; `_PersonalMenu.cshtml` giữ nhóm chức năng và điều kiện quyền; CSS nằm cuối `wwwroot/css/site.css`; `site.js` chỉ đồng bộ aria-expanded. Bootstrap sẵn có xử lý mở/đóng, focus, Escape và backdrop; không thêm thư viện hoặc migration.
+
+Trong VS Code, xanh/U là file Git chưa theo dõi, vàng/M là file đã sửa so với commit. Đã đặt `git.decorations.enabled: false` trong `.vscode/settings.json` của thư mục gốc và thư mục web, để áp dụng cả hai cách mở dự án. Thiết lập chỉ ẩn dấu trạng thái; Git vẫn theo dõi thay đổi, màu cú pháp code và biểu tượng loại file vẫn dùng theme hiện tại. Nếu cửa sổ chưa cập nhật, mở Command Palette (`Ctrl+Shift+P`) → **Developer: Reload Window**. Muốn hiện lại trạng thái Git, đổi thiết lập về true.

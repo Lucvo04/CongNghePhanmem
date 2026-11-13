@@ -48,7 +48,7 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
     {
         using var client = await AdminClientAsync();
         var student = await SeedUserAsync();
-        foreach (var path in new[] { "/Admin/Students", "/Admin/Students/Create", $"/Admin/Students/ChangeStatus/{student.Id}" })
+        foreach (var path in new[] { "/Admin/Students", $"/Admin/Students/ChangeStatus/{student.Id}" })
         {
             var get = await client.GetAsync(path);
             Assert.Equal(HttpStatusCode.OK, get.StatusCode);
@@ -64,7 +64,6 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
     {
         var admin = await SeedUserAsync(SystemRoles.Admin);
         using var client = app.BrowserClient();
-        await LoginAsync(client, admin);
         var form = NewForm();
         form["FullName"] = "  Sinh viên kiểm thử  ";
         var code = "00" + Guid.NewGuid().ToString("N")[..20];
@@ -82,16 +81,19 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
         Assert.Equal(code.ToUpperInvariant(), created.StudentCode);
         Assert.Equal("Sinh viên kiểm thử", created.FullName);
         Assert.Equal("CNTT-01", created.ClassName); Assert.Equal("Công nghệ thông tin", created.Faculty);
-        Assert.Equal(UserStatus.Active, created.Status);
+        Assert.Equal(UserStatus.Pending, created.Status);
         Assert.Equal(new[] { SystemRoles.Student }, await manager.GetRolesAsync(created));
         Assert.NotEqual(form["Password"], created.PasswordHash);
         Assert.True(await manager.CheckPasswordAsync(created, form["Password"]));
         var audit = await db.AuditLogs.SingleAsync(log => log.EntityId == created.Id);
-        Assert.Equal(admin.Id, audit.ActorId); Assert.Equal("StudentCreated", audit.Action); Assert.Null(audit.BeforeData);
+        Assert.Equal(created.Id, audit.ActorId); Assert.Equal("StudentRegistered", audit.Action); Assert.Null(audit.BeforeData);
         Assert.DoesNotContain(form["Password"], audit.AfterData);
         Assert.DoesNotContain(created.PasswordHash!, audit.AfterData);
-        Assert.Equal("{\"Status\":\"Active\",\"Role\":\"Student\"}", audit.AfterData);
+        Assert.Equal("{\"Status\":\"Pending\"}", audit.AfterData);
         using var studentClient = app.BrowserClient();
+        Assert.Equal(HttpStatusCode.OK, (await LoginResponseAsync(studentClient, new(created.Id, email, form["Password"]))).StatusCode);
+        var review = scope.ServiceProvider.GetRequiredService<StudentRegistrationService>();
+        Assert.True((await review.ReviewAsync(created.Id, admin.Id, created.ConcurrencyStamp!, true, null)).Succeeded);
         await LoginAsync(studentClient, new(created.Id, email, form["Password"]));
         Assert.Equal(HttpStatusCode.OK, (await studentClient.GetAsync("/Account/Overview")).StatusCode);
         Assert.Contains("AccessDenied", (await studentClient.GetAsync("/Admin/Students")).Headers.Location!.OriginalString);
@@ -108,7 +110,7 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
     [InlineData("Password", "Short!9", "ít nhất 10 ký tự")]
     public async Task ServerRejectsInvalidCreationWithoutEchoingPasswords(string field, string value, string expected)
     {
-        using var client = await AdminClientAsync();
+        using var client = app.BrowserClient();
         var form = NewForm(); form[field] = value;
         if (field == "Password") form["ConfirmPassword"] = value;
         var response = await CreateAsync(client, form);
@@ -122,10 +124,10 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
 
     [Theory]
     [InlineData("Email", "Email đã được sử dụng")]
-    [InlineData("StudentCode", "Mã sinh viên đã được sử dụng")]
+    [InlineData("StudentCode", "Email hoặc mã sinh viên đã được sử dụng")]
     public async Task DuplicateEmailOrCodeIsRejectedIgnoringCase(string field, string expected)
     {
-        using var client = await AdminClientAsync();
+        using var client = app.BrowserClient();
         var first = NewForm();
         Assert.Equal(HttpStatusCode.Redirect, (await CreateAsync(client, first)).StatusCode);
         var duplicate = NewForm(); duplicate[field] = first[field].ToUpperInvariant();
@@ -142,7 +144,7 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
     [InlineData("StudentCode")]
     public async Task ConcurrentDuplicatesCreateExactlyOneAccountAndAudit(string field)
     {
-        using var client1 = await AdminClientAsync(); using var client2 = await AdminClientAsync();
+        using var client1 = app.BrowserClient(); using var client2 = app.BrowserClient();
         var first = NewForm(); var second = NewForm(); second[field] = first[field];
         var responses = await Task.WhenAll(CreateAsync(client1, first), CreateAsync(client2, second));
         Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Redirect);
@@ -151,7 +153,7 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
         var matches = await db.Users.Where(user => user.Email == first["Email"] || user.Email == second["Email"]).ToListAsync();
         Assert.Single(matches);
         Assert.Equal(1, await db.AuditLogs.CountAsync(log => log.EntityId == matches[0].Id));
-        Assert.Equal(1, await db.UserRoles.CountAsync(role => role.UserId == matches[0].Id));
+        Assert.Equal("system-student", matches[0].RoleId);
     }
 
     [Fact]
@@ -237,10 +239,10 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
         await using (var scope = app.Services.CreateAsyncScope())
         {
             var manager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            Assert.True((await manager.AddToRoleAsync((await manager.FindByIdAsync(dual.Id))!, SystemRoles.Student)).Succeeded);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => manager.AddToRoleAsync((manager.FindByIdAsync(dual.Id).GetAwaiter().GetResult())!, SystemRoles.Student));
         }
         using var admin = app.BrowserClient(); await LoginAsync(admin, owner);
-        var token = Hidden(await admin.GetStringAsync("/Admin/Students/Create"), "__RequestVerificationToken");
+        var token = Hidden(await admin.GetStringAsync("/Account/Overview"), "__RequestVerificationToken");
         foreach (var target in new[] { owner, other, dual, new TestUser("missing", "", "") })
         {
             var path = $"/Admin/Students/ChangeStatus/{target.Id}";
@@ -259,15 +261,6 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
     [Fact]
     public async Task AuditFailureRollsBackUserRoleAndStatusStamp()
     {
-        var form = NewForm();
-        await using (var scope = app.Services.CreateAsyncScope())
-        {
-            var service = scope.ServiceProvider.GetRequiredService<StudentAccountService>();
-            await Assert.ThrowsAsync<DbUpdateException>(() => service.CreateAsync(new(form["FullName"], form["StudentCode"],
-                form["Email"], null, null, form["Password"]), "nonexistent-actor"));
-        }
-        await using (var db = database.CreateContext())
-            Assert.False(await db.Users.AnyAsync(user => user.Email == form["Email"]));
         var student = await SeedUserAsync(); var original = await ReadUserAsync(student.Id);
         await using (var scope = app.Services.CreateAsyncScope())
         {
@@ -336,8 +329,8 @@ public class StudentAccountTests(SqlServerFixture database) : IClassFixture<SqlS
 
     private static async Task<HttpResponseMessage> CreateAsync(HttpClient client, Dictionary<string, string> form)
     {
-        form["__RequestVerificationToken"] = Hidden(await client.GetStringAsync("/Admin/Students/Create"), "__RequestVerificationToken");
-        return await client.PostAsync("/Admin/Students/Create", new FormUrlEncodedContent(form));
+        form["__RequestVerificationToken"] = Hidden(await client.GetStringAsync("/Account/Register"), "__RequestVerificationToken");
+        return await client.PostAsync("/Account/Register", new FormUrlEncodedContent(form));
     }
 
     private static async Task<HttpResponseMessage> LoginResponseAsync(HttpClient client, TestUser user)

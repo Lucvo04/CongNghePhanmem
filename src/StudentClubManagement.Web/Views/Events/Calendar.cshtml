@@ -1,0 +1,59 @@
+@model StudentClubManagement.Web.ViewModels.Events.EventCalendarViewModel
+@using System.Globalization
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Lịch hoạt động";
+    ViewData["ActiveNav"] = "Calendar";
+    var from = Model.From?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    var to = Model.To?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    var returnUrl = Url.Action("Calendar", new { From = from, To = to, Model.ClubId, Model.Status, Model.Search, Model.Page });
+}
+<section class="catalog-heading py-5">
+    <div class="container"><p class="eyebrow">Cùng nhau trải nghiệm</p><h1 class="h2">Lịch hoạt động</h1><p class="text-secondary mb-0">Khám phá những buổi gặp gỡ, học hỏi và hoạt động của cộng đồng sinh viên.</p></div>
+</section>
+<section class="container py-4 py-md-5" aria-label="Tra cứu lịch hoạt động">
+    <form asp-action="Calendar" method="get" class="card community-card p-4 mb-4" aria-label="Bộ lọc lịch hoạt động">
+        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+        <div class="row g-3">
+            <div class="col-sm-6 col-lg-3"><label asp-for="From" class="form-label fw-semibold"></label><input asp-for="From" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" required aria-describedby="calendar-range-help" /></div>
+            <div class="col-sm-6 col-lg-3"><label asp-for="To" class="form-label fw-semibold"></label><input asp-for="To" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" required aria-describedby="calendar-range-help" /></div>
+            <div class="col-lg-6"><label asp-for="ClubId" class="form-label fw-semibold"></label><select asp-for="ClubId" class="form-select"><option value="">Tất cả câu lạc bộ</option>@foreach (var club in Model.Clubs) { <option value="@club.Id">@club.Name</option> }</select></div>
+            <div class="col-md-6"><label asp-for="Search" class="form-label fw-semibold"></label><input asp-for="Search" class="form-control" maxlength="180" placeholder="Tìm buổi sinh hoạt, workshop…" /></div>
+            <div class="col-md-6"><label asp-for="Status" class="form-label fw-semibold"></label><select asp-for="Status" class="form-select"><option value="">Tất cả trạng thái</option><option value="2">Đã công bố</option><option value="3">Đã hủy</option><option value="4">Đã hoàn thành</option></select></div>
+        </div>
+        <p id="calendar-range-help" class="small text-secondary mt-3 mb-3">Lọc theo ngày bắt đầu, tính cả hai ngày đã chọn, theo giờ Việt Nam (UTC+7). Mỗi lần xem tối đa 366 ngày.</p>
+        <div class="d-flex flex-wrap gap-2"><button type="submit" class="btn btn-primary px-4">Xem lịch</button><a class="btn btn-outline-secondary" asp-action="Calendar">Đặt lại bộ lọc</a></div>
+    </form>
+    @if (User.Identity?.IsAuthenticated != true) {
+        <p class="small text-secondary">Bạn đang xem hoạt động toàn trường. <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl">Đăng nhập</a> để xem thêm hoạt động nội bộ của CLB mình tham gia.</p>
+    }
+    @if (ViewData.ModelState.IsValid) {
+        <p class="mb-4" role="status"><strong>@Model.Count hoạt động</strong> phù hợp · Trang @Model.Page / @Model.Pages · Giờ Việt Nam</p>
+        @if (Model.Items.Count == 0) {
+            <div class="card community-card p-4 p-md-5 text-center"><h2 class="h4">Chưa có hoạt động phù hợp</h2><p class="text-secondary mb-0">Hãy thử thay đổi khoảng ngày, chọn CLB khác hoặc bỏ bớt bộ lọc.</p></div>
+        }
+        @foreach (var day in Model.Items.GroupBy(e => DateOnly.FromDateTime(e.StartsAt.ToOffset(TimeSpan.FromHours(7)).DateTime))) {
+            <section class="calendar-day mb-4" aria-labelledby="day-@day.Key.ToString("yyyyMMdd")">
+                <h2 class="h5 calendar-date" id="day-@day.Key.ToString("yyyyMMdd")"><time datetime="@day.Key.ToString("yyyy-MM-dd")">@day.Key.ToString("dddd, dd/MM/yyyy", CultureInfo.GetCultureInfo("vi-VN"))</time></h2>
+                <div class="d-grid gap-3">
+                @foreach (var item in day) {
+                    <article class="card community-card calendar-event @(item.Status == EventStatus.Cancelled ? "calendar-cancelled" : "")" data-event-id="@item.Id">
+                        <div class="calendar-time"><time datetime="@item.StartsAt.ToString("o")">@item.StartsAt.ToOffset(TimeSpan.FromHours(7)).ToString("HH:mm")</time><span>đến @item.EndsAt.Vietnam()</span></div>
+                        <div class="calendar-content"><div class="d-flex flex-wrap gap-2 mb-2"><span class="badge @(item.Status == EventStatus.Cancelled ? "text-bg-danger" : "text-bg-light")">@item.Status.Label()</span><span class="badge text-bg-light">@item.Audience.Label()</span>
+                        @if (item.Status == EventStatus.Published) { <span class="small text-secondary">@(item.StartsAt > Model.Now ? "Sắp diễn ra" : item.EndsAt > Model.Now ? "Đang diễn ra" : "Đã kết thúc")</span> }</div>
+                        <h3 class="h5 text-break mb-2"><a asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="@returnUrl">@item.Title</a></h3><p class="small mb-1 text-break"><a asp-controller="Clubs" asp-action="Details" asp-route-id="@item.ClubId">@item.ClubName</a></p><p class="text-secondary small mb-0 text-break">@item.Location</p>
+                        @if (item.Status == EventStatus.Cancelled) { <p class="text-danger small mt-2 mb-0">Hoạt động đã hủy; thông tin được giữ để tra cứu.</p> }</div>
+                    </article>
+                }
+                </div>
+            </section>
+        }
+        @if (Model.Pages > 1) {
+            <nav class="d-flex flex-wrap align-items-center justify-content-center gap-3 mt-4" aria-label="Phân trang lịch hoạt động">
+                @if (Model.Page > 1) { <a class="btn btn-outline-primary" asp-action="Calendar" asp-route-From="@from" asp-route-To="@to" asp-route-ClubId="@Model.ClubId" asp-route-Status="@Model.Status" asp-route-Search="@Model.Search" asp-route-Page="@(Model.Page - 1)">Trang trước</a> }
+                <span aria-current="page">Trang @Model.Page / @Model.Pages</span>
+                @if (Model.Page < Model.Pages) { <a class="btn btn-outline-primary" asp-action="Calendar" asp-route-From="@from" asp-route-To="@to" asp-route-ClubId="@Model.ClubId" asp-route-Status="@Model.Status" asp-route-Search="@Model.Search" asp-route-Page="@(Model.Page + 1)">Trang sau</a> }
+            </nav>
+        }
+    }
+</section>

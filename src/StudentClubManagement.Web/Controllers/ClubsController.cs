@@ -58,7 +58,7 @@ public class ClubsController(ApplicationDbContext db) : Controller
     {
         if (!ModelState.IsValid || id <= 0) return MissingClub();
         var club = await PublishedClubs.Where(club => club.Id == id)
-            .Select(club => new PublicClubDetailsViewModel(club.Code, club.Name, club.Category, club.Description, club.Status))
+            .Select(club => new PublicClubDetailsViewModel(club.Id, club.Code, club.Name, club.Category, club.Description, club.Status))
             .SingleOrDefaultAsync();
         return club is null ? MissingClub() : View(club);
     }

@@ -17,11 +17,12 @@ public class ClubSignInManager(
     : SignInManager<ApplicationUser>(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
 {
     public override async Task<bool> CanSignInAsync(ApplicationUser user) =>
-        user.Status == UserStatus.Active && await base.CanSignInAsync(user);
+        user.Status == UserStatus.Active && !user.TwoFactorEnabled && await base.CanSignInAsync(user);
 
     public override async Task<ApplicationUser?> ValidateSecurityStampAsync(ClaimsPrincipal? principal)
     {
         var user = await base.ValidateSecurityStampAsync(principal);
-        return user?.Status == UserStatus.Active ? user : null;
+        // Schema rút gọn chưa hỗ trợ 2FA: không cho bỏ qua nếu cờ bị bật ngoài UI.
+        return user?.Status == UserStatus.Active && !user.TwoFactorEnabled ? user : null;
     }
 }

@@ -17,4 +17,4 @@ public class PublicClubListViewModel
     public IReadOnlyList<PublicClubCard> Clubs { get; set; } = [];
 }
 
-public record PublicClubDetailsViewModel(string Code, string Name, string? Category, string? Description, ClubStatus Status);
+public record PublicClubDetailsViewModel(int Id, string Code, string Name, string? Category, string? Description, ClubStatus Status);

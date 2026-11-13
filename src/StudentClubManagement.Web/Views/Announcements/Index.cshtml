@@ -1,0 +1,40 @@
+@model StudentClubManagement.Web.ViewModels.Announcements.AnnouncementList
+@using StudentClubManagement.Web.Models
+@{ ViewData["Title"] = "Thông báo CLB"; }
+<section class="container py-5">
+    <a asp-controller="ClubManagement" asp-action="Index">← CLB tôi quản lý</a>
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 my-4">
+        <div><p class="eyebrow">@Model.Club.Name</p><h1 class="h2">Thông báo CLB</h1><p class="text-secondary mb-0">Soạn nội dung, chọn đối tượng và kiểm tra trước khi đăng.</p></div>
+        @if (Model.Club.Status == ClubStatus.Active) { <div><a class="btn btn-primary" asp-action="Create" asp-route-clubId="@Model.Club.Id">Soạn thông báo</a></div> }
+    </div>
+    @if (Model.Club.Status != ClubStatus.Active) { <div class="alert alert-info">CLB hiện không hoạt động. Không thể soạn hoặc đăng thông báo mới.</div> }
+    <form asp-action="Index" method="get" class="card community-card p-4 mb-4">
+        <input name="clubId" type="hidden" value="@Model.Club.Id" />
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5"><label for="search" class="form-label">Tìm tiêu đề</label><input id="search" name="search" value="@Model.Search" maxlength="180" class="form-control" /></div>
+            <div class="col-md-3"><label for="status" class="form-label">Trạng thái</label><select id="status" name="status" class="form-select"><option value="">Tất cả</option>@foreach (var state in Enum.GetValues<AnnouncementStatus>()) { <option value="@((int)state)" selected="@(Model.Status == state)">@state.Label()</option> }</select></div>
+            <div class="col-md-4 d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">Tìm kiếm</button><a class="btn btn-outline-secondary" asp-action="Index" asp-route-clubId="@Model.Club.Id">Bỏ lọc</a></div>
+        </div>
+    </form>
+    <p class="small text-secondary">@Model.Count thông báo · Trang @Model.Page / @Model.Pages</p>
+    @if (Model.Count == 0) { <div class="card community-card p-5 text-center"><h2 class="h5">Chưa có thông báo phù hợp</h2><p class="mb-0">Thử đổi bộ lọc hoặc soạn thông báo đầu tiên cho CLB.</p></div> }
+    <div class="row g-3">
+        @foreach (var item in Model.Items)
+        {
+            <div class="col-lg-6"><article class="card community-card p-4 h-100">
+                <div class="d-flex flex-wrap gap-2 justify-content-between mb-3"><span class="badge text-bg-light">@item.Status.Label()</span><small class="text-secondary">@EventLabels.Vietnam(item.PublishedAt ?? item.CreatedAt)</small></div>
+                <h2 class="h5 text-break">@item.Title</h2><p class="small text-secondary text-break">@(item.EventId is null ? "Thành viên CLB" : "Người đăng ký: " + item.Event?.Title)</p>
+                @if (item.SourceKey is not null) { <p class="small text-secondary">Tự động từ hoạt động</p> }
+                <a class="btn btn-outline-primary mt-auto align-self-start" asp-action="Details" asp-route-id="@item.Id">Chi tiết thông báo</a>
+            </article></div>
+        }
+    </div>
+    @if (Model.Pages > 1)
+    {
+        <nav class="d-flex justify-content-end align-items-center gap-3 mt-4" aria-label="Phân trang thông báo">
+            @if (Model.Page > 1) { <a class="btn btn-outline-secondary" asp-route-clubId="@Model.Club.Id" asp-route-search="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page - 1)">Trang trước</a> }
+            <span>@Model.Page / @Model.Pages</span>
+            @if (Model.Page < Model.Pages) { <a class="btn btn-outline-secondary" asp-route-clubId="@Model.Club.Id" asp-route-search="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page + 1)">Trang sau</a> }
+        </nav>
+    }
+</section>

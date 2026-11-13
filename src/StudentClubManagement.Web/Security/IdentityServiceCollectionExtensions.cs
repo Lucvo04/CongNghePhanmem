@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using StudentClubManagement.Web.Data;
 using StudentClubManagement.Web.Models;
 
 namespace StudentClubManagement.Web.Security;
@@ -29,9 +28,9 @@ public static class IdentityServiceCollectionExtensions
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddUserStore<CoreUserStore>()
+            .AddRoleStore<CoreRoleStore>()
             .AddErrorDescriber<VietnameseIdentityErrorDescriber>()
-            .AddSignInManager<ClubSignInManager>()
-            .AddDefaultTokenProviders();
+            .AddSignInManager<ClubSignInManager>();
     }
 }

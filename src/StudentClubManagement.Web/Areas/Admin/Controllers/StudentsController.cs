@@ -12,7 +12,7 @@ namespace StudentClubManagement.Web.Areas.Admin.Controllers;
 [Area("Admin")]
 [Authorize(Roles = SystemRoles.Admin)]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-public class StudentsController(StudentAccountService accounts, UserManager<ApplicationUser> users) : Controller
+public class StudentsController(StudentAccountService accounts, UserManager<ApplicationUser> users, StudentRegistrationService registrations) : Controller
 {
     private const int PageSize = 10;
 
@@ -42,46 +42,42 @@ public class StudentsController(StudentAccountService accounts, UserManager<Appl
     }
 
     [HttpGet]
-    public IActionResult Create() => View(new CreateStudentViewModel());
+    public IActionResult Create() => RedirectToAction(nameof(Index), new { status = UserStatus.Pending });
 
-    [HttpPost]
-    public async Task<IActionResult> Create(CreateStudentViewModel model)
+    // Endpoint cũ không được phép bỏ qua quy trình sinh viên tự đăng ký/chờ duyệt.
+    [HttpPost, ActionName("Create")]
+    public IActionResult CreateDisabled() => NotFound();
+
+    [HttpGet]
+    public async Task<IActionResult> Review(string id)
     {
-        // Form chỉ có chuỗi: chuẩn hóa rồi kiểm tra lại toàn bộ, không trim mật khẩu.
-        model.FullName = model.FullName?.Trim() ?? string.Empty;
-        model.StudentCode = model.StudentCode?.Trim().ToUpperInvariant() ?? string.Empty;
-        model.Email = model.Email?.Trim().ToLowerInvariant() ?? string.Empty;
-        model.ClassName = model.ClassName?.Trim();
-        model.Faculty = model.Faculty?.Trim();
-        ModelState.Clear();
-        if (!TryValidateModel(model)) return CreateError(model);
-
-        var result = await accounts.CreateAsync(new CreateStudentRequest(model.FullName, model.StudentCode,
-            model.Email, model.ClassName, model.Faculty, model.Password), users.GetUserId(User)!);
-        if (!result.Succeeded)
-        {
-            foreach (var error in result.Errors)
-            {
-                var field = error.Code switch
-                {
-                    "DuplicateStudentCode" => nameof(model.StudentCode),
-                    "DuplicateEmail" or "DuplicateUserName" or "InvalidEmail" or "InvalidUserName" => nameof(model.Email),
-                    _ when error.Code.StartsWith("Password", StringComparison.Ordinal) => nameof(model.Password),
-                    _ => string.Empty
-                };
-                ModelState.AddModelError(field, error.Description);
-            }
-            return CreateError(model);
-        }
-        TempData["StatusMessage"] = "Đã cấp tài khoản sinh viên. Hãy bàn giao thông tin đăng nhập và hướng dẫn sinh viên đổi mật khẩu.";
-        return RedirectToAction(nameof(Index), new { search = model.StudentCode });
+        var user = await accounts.Students.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id);
+        return user is null ? NotFound() : View(new StudentRegistrationReview { Student = Row(user), ConcurrencyStamp = user.ConcurrencyStamp! });
     }
 
+    [HttpPost]
+    public async Task<IActionResult> Review(string id, StudentRegistrationReview model)
+    {
+        var user = await accounts.Students.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id);
+        if (user is null) return NotFound();
+        model.Student = Row(user);
+        if (!ModelState.IsValid) return View(model);
+        var result = await registrations.ReviewAsync(id, users.GetUserId(User)!, model.ConcurrencyStamp, model.Approve!.Value, model.Reason);
+        if (result.Code == "NotFound") return NotFound();
+        if (!result.Succeeded)
+        {
+            if (result.Code == "Conflict") Response.StatusCode = 409;
+            ModelState.AddModelError("", result.Message); return View(model);
+        }
+        TempData["StatusMessage"] = model.Approve.Value ? "Đã duyệt tài khoản. Sinh viên có thể đăng nhập bằng mật khẩu đã tự đặt." : "Đã từ chối đăng ký tài khoản.";
+        return RedirectToAction(nameof(Index), new { status = UserStatus.Pending });
+    }
     [HttpGet]
     public async Task<IActionResult> ChangeStatus(string id)
     {
         var user = await accounts.Students.AsNoTracking().SingleOrDefaultAsync(student => student.Id == id);
         if (user is null) return NotFound();
+        if (user.Status is UserStatus.Pending or UserStatus.Rejected) return RedirectToAction(nameof(Review), new { id });
         return View(new ChangeStudentStatusViewModel
         {
             Student = Row(user), ConcurrencyStamp = user.ConcurrencyStamp!,
@@ -110,14 +106,6 @@ public class StudentsController(StudentAccountService accounts, UserManager<Appl
             ? "Đã khóa tài khoản. Các phiên đang đăng nhập bị từ chối từ yêu cầu tiếp theo."
             : "Đã mở khóa tài khoản. Sinh viên cần đăng nhập lại; thời hạn tạm khóa do nhập sai mật khẩu (nếu có) vẫn được giữ.";
         return RedirectToAction(nameof(Index), new { search = user.StudentCode });
-    }
-
-    private IActionResult CreateError(CreateStudentViewModel model)
-    {
-        ModelState.SetModelValue(nameof(model.Password), string.Empty, string.Empty);
-        ModelState.SetModelValue(nameof(model.ConfirmPassword), string.Empty, string.Empty);
-        model.Password = model.ConfirmPassword = string.Empty;
-        return View(nameof(Create), model);
     }
 
     private static StudentRow Row(ApplicationUser user) =>

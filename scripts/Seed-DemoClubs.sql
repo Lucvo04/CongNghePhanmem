@@ -22,13 +22,12 @@ BEGIN TRY
     IF @LockResult < 0 THROW 50001, 'Could not acquire demo seed lock.', 1;
 
     DECLARE @ActorId nvarchar(450) = (
-        SELECT u.Id FROM AspNetUsers u
+        SELECT u.Id FROM Users u
         WHERE u.NormalizedEmail=N'LUCVOADMIN@CLB.LOCAL' AND u.Status=1
-        AND EXISTS (SELECT 1 FROM AspNetUserRoles ur JOIN AspNetRoles r ON r.Id=ur.RoleId
-                    WHERE ur.UserId=u.Id AND r.NormalizedName=N'ADMIN')
+        AND u.RoleId=N'system-admin'
     );
     IF @ActorId IS NULL THROW 50002, 'Expected active project administrator was not found.', 1;
-    DECLARE @StudentRoleId nvarchar(450) = (SELECT Id FROM AspNetRoles WHERE NormalizedName=N'STUDENT');
+    DECLARE @StudentRoleId nvarchar(450) = (SELECT Id FROM Roles WHERE Name=N'Student');
     IF @StudentRoleId IS NULL THROW 50003, 'Student role is missing. Apply project migrations first.', 1;
 
     DECLARE @Samples TABLE (
@@ -67,18 +66,16 @@ BEGIN TRY
         BEGIN
             SET @UserId=N'demo-club-manager-'+@Alias;
             SET @Email=N'demo.'+@Alias+N'@example.test';
-            IF EXISTS (SELECT 1 FROM AspNetUsers WHERE Id=@UserId OR NormalizedEmail=UPPER(@Email)
-                       OR NormalizedUserName=UPPER(@Email) OR StudentCode=@Code)
+            IF EXISTS (SELECT 1 FROM Users WHERE Id=@UserId OR NormalizedEmail=UPPER(@Email)
+                       OR StudentCode=@Code)
                 THROW 50004, 'A demo manager identifier already exists. No existing account will be reused or modified.', 1;
 
             -- Không có PasswordHash, external login hoặc token: hồ sơ mẫu không có thông tin đăng nhập.
-            INSERT INTO AspNetUsers (Id,UserName,NormalizedUserName,Email,NormalizedEmail,EmailConfirmed,
-                PhoneNumberConfirmed,TwoFactorEnabled,LockoutEnabled,AccessFailedCount,FullName,
+            INSERT INTO Users (Id,Email,NormalizedEmail,RoleId,AccessFailedCount,FullName,
                 StudentCode,ClassName,Faculty,Status,CreatedAt,SecurityStamp,ConcurrencyStamp)
-            VALUES (@UserId,@Email,UPPER(@Email),@Email,UPPER(@Email),0,0,0,1,0,
+            VALUES (@UserId,@Email,UPPER(@Email),@StudentRoleId,0,
                 N'Chủ nhiệm mẫu — '+@ManagerLabel,@Code,N'Dữ liệu mẫu',N'Dữ liệu mẫu',1,
                 SYSDATETIMEOFFSET(),CONVERT(nvarchar(36),NEWID()),CONVERT(nvarchar(36),NEWID()));
-            INSERT INTO AspNetUserRoles (UserId,RoleId) VALUES (@UserId,@StudentRoleId);
             INSERT INTO Clubs (Code,Name,Category,Description,Status,CreatedAt)
             VALUES (@Code,@Name,@Category,@Description+NCHAR(10)+NCHAR(10)+
                 N'Lưu ý: Đây là CLB mẫu phục vụ đồ án và thử nghiệm tìm kiếm, không phải thông tin xác nhận về CLB chính thức của Trường Đại học Vinh.',1,SYSDATETIMEOFFSET());

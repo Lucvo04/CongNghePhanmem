@@ -1,0 +1,39 @@
+@model StudentClubManagement.Web.ViewModels.JoinRequests.ReviewRequestListViewModel
+@{ ViewData["Title"] = "Đơn gia nhập CLB"; }
+<section class="container py-5">
+    <a asp-controller="ClubManagement" asp-action="Index">← CLB tôi quản lý</a>
+    <p class="eyebrow mt-4">Kết nối thành viên mới</p>
+    <h1 class="h2">Đơn gia nhập</h1>
+    <p class="fs-5 text-break">@Model.ClubName</p>
+    @if (TempData["ReviewNotice"] is string notice) { <div class="alert alert-success" role="status">@notice</div> }
+    @if (Model.ClubStatus != ClubStatus.Active) { <div class="alert alert-info">@(Model.ClubStatus == ClubStatus.Archived ? "CLB đã lưu trữ. Bạn chỉ có thể xem lịch sử đơn." : "CLB tạm dừng: chưa thể chấp nhận thành viên mới; vẫn có thể từ chối đơn kèm lý do.")</div> }
+    <form method="get" asp-action="Index" class="d-flex flex-wrap align-items-end gap-3 my-4">
+        <input type="hidden" name="clubId" value="@Model.ClubId" />
+        <div><label for="status" class="form-label">Trạng thái</label><select id="status" name="status" class="form-select">
+            <option value="all" selected="@(Model.Status is null)">Tất cả</option>
+            @foreach (var state in Enum.GetValues<JoinRequestStatus>()) { <option value="@((int)state)" selected="@(Model.Status == state)">@state.Label()</option> }
+        </select></div>
+        <button class="btn btn-primary" type="submit">Lọc đơn</button>
+    </form>
+    <p class="small text-secondary">@Model.TotalCount đơn · Trang @Model.Page / @Model.TotalPages · Đơn gửi trước hiển thị trước</p>
+    @if (Model.Requests.Count == 0) { <div class="card community-card p-4">Chưa có đơn phù hợp với bộ lọc.</div> }
+    <div class="row g-3">
+    @foreach (var item in Model.Requests)
+    {
+        <div class="col-lg-6"><article class="card community-card h-100 p-4">
+            <div class="d-flex flex-wrap justify-content-between gap-2"><span class="badge text-bg-light">@item.Status.Label()</span><span class="small text-secondary">@item.SubmittedAt.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy · HH:mm")</span></div>
+            <h2 class="h5 mt-3 text-break">@item.StudentName</h2><p class="small text-secondary">Mã sinh viên: @(item.StudentCode ?? "Chưa cập nhật")</p>
+            <p class="club-description text-break">@item.Reason</p>
+            <a class="btn btn-outline-primary align-self-start mt-auto" asp-action="Decide" asp-route-id="@item.Id" aria-label="Xem đơn của @item.StudentName">@(item.Status == JoinRequestStatus.Pending && Model.ClubStatus != ClubStatus.Archived ? "Xem và xử lý" : "Xem kết quả")</a>
+        </article></div>
+    }
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="d-flex gap-3 align-items-center mt-4" aria-label="Phân trang xét duyệt">
+            @if (Model.Page > 1) { <a asp-action="Index" asp-route-clubId="@Model.ClubId" asp-route-status="@(Model.Status?.ToString() ?? "all")" asp-route-page="@(Model.Page - 1)">Trang trước</a> }
+            <span>@Model.Page / @Model.TotalPages</span>
+            @if (Model.Page < Model.TotalPages) { <a asp-action="Index" asp-route-clubId="@Model.ClubId" asp-route-status="@(Model.Status?.ToString() ?? "all")" asp-route-page="@(Model.Page + 1)">Trang sau</a> }
+        </nav>
+    }
+</section>

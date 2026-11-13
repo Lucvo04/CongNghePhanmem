@@ -169,13 +169,13 @@ public class ClubManagementTests(SqlServerFixture database) : IClassFixture<SqlS
     [InlineData("suspended")]
     [InlineData("left")]
     [InlineData("disabled")]
-    [InlineData("dual-role")]
+    [InlineData("admin-role")]
     [InlineData("other-club")]
     public async Task TransferRejectsIneligiblePeopleAndNeverCreatesMembership(string condition)
     {
         var actor = await UserAsync(SystemRoles.Admin); var old = await UserAsync(); var next = await UserAsync();
         var club = await ClubAsync(actor, old);
-        if (condition is "suspended" or "left" or "disabled" or "dual-role") await MemberAsync(club.Id, next.Id);
+        if (condition is "suspended" or "left" or "disabled" or "admin-role") await MemberAsync(club.Id, next.Id);
         if (condition == "other-club") await MemberAsync((await ClubAsync(actor, await UserAsync())).Id, next.Id);
         await using (var db = database.CreateContext())
         {
@@ -186,7 +186,7 @@ public class ClubManagementTests(SqlServerFixture database) : IClassFixture<SqlS
                 member.Status = condition == "left" ? MembershipStatus.Left : MembershipStatus.Suspended;
                 if (condition == "left") member.EndedAt = DateTimeOffset.UtcNow;
             }
-            if (condition == "dual-role") db.UserRoles.Add(new IdentityUserRole<string> { UserId = next.Id, RoleId = "system-admin" });
+            if (condition == "admin-role") (await db.Users.FindAsync(next.Id))!.RoleId = "system-admin";
             await db.SaveChangesAsync();
         }
         using var admin = await ClientAsync(actor);

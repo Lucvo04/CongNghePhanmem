@@ -4,9 +4,11 @@
 
 ## Trạng thái hiện tại
 
-Bước 8 trong Sprint 1: đã có xác thực, quản lý tài khoản sinh viên, tạo/sửa CLB, chuyển chủ nhiệm, danh mục CLB công khai và chỉnh sửa hồ sơ cá nhân. Giao diện tiếng Việt dùng chung Bootstrap trên ASP.NET Core MVC .NET 10, EF Core SQL Server. Toàn bộ 146 kiểm thử tích hợp đạt.
+Cập nhật 13/11/2026: đã có đăng nhập/phân quyền, hồ sơ, CLB, đơn gia nhập, thành viên, hoạt động/lịch; bổ sung sinh viên tự đăng ký chờ Admin duyệt và đơn thành lập CLB. Mỗi tài khoản có một quyền hệ thống qua Users.RoleId, không còn UserRoles. Chủ nhiệm thuộc Memberships. Giao diện giữ Bootstrap/MVC .NET 10 và SQL Server. PB12 đăng ký/hủy, PB13 lịch sử, PB14 điểm danh, PB15 chốt/sửa có truy vết, PB16 đăng thông báo, PB17 hộp thông báo/đã đọc và PB18 thông báo tự động đổi lịch/hủy đã triển khai. Toàn bộ 448 kiểm thử tích hợp đạt.
 
 Migration khởi tạo hai role `Admin`, `Student`. Quản trị viên đầu tiên được tạo riêng bằng lệnh có kiểm soát, không tự tạo khi khởi động website. Chủ nhiệm là vai trò trong từng membership, không phải role hệ thống mới. `/health` kiểm tra tiến trình; `/health/ready` kiểm tra kết nối SQL và migration còn chờ.
+
+Điều hướng mới: thanh ngang giữ **Trang chủ, Câu lạc bộ, Lịch hoạt động, Giới thiệu**. Khi đăng nhập, chọn **Cá nhân** để mở menu bên chứa Thông báo, Đơn của tôi, Thành lập CLB, Tài khoản, Đổi mật khẩu và Đăng xuất. Chủ nhiệm có thêm **CLB tôi quản lý**. Đóng bằng X, Escape hoặc bấm ra ngoài; menu mặc định đóng. Xem [hướng dẫn giao diện và thiết lập màu file trong VS Code](docs/interface-redesign.md#điều-hướng-tối-giản--13112026).
 
 ## Yêu cầu môi trường
 
@@ -113,11 +115,11 @@ Email đăng nhập, mã SV, trạng thái và quyền hệ thống không sửa
 
 Bước 8 không thêm migration. Xem [thiết kế, kiểm thử và nghiệm thu PB06](docs/personal-profile.md).
 
-## Cấp và khóa tài khoản sinh viên
+## Đăng ký, duyệt và khóa tài khoản sinh viên
 
-Đăng nhập Admin → **Quản trị → Quản lý tài khoản sinh viên** (`/Admin/Students`). Chọn **Cấp tài khoản**, nhập họ tên, mã sinh viên, email, mật khẩu ban đầu và xác nhận. Lớp/khoa tùy chọn. Hệ thống yêu cầu email và mã sinh viên duy nhất; mã giữ số 0 đầu, không chứa khoảng trắng bên trong.
+Sinh viên vào **Đăng nhập → Đăng ký sinh viên**, tự nhập hồ sơ và mật khẩu. Admin vào **Tài khoản sinh viên → Đăng ký chờ duyệt** để chấp nhận hoặc từ chối (cần lý do). Chỉ tài khoản đã duyệt mới đăng nhập được. Xem [luồng phê duyệt mới và vị trí code](docs/approval-workflows.md).
 
-Bàn giao mật khẩu riêng cho sinh viên và hướng dẫn đổi mật khẩu tại **Tài khoản → Đổi mật khẩu**. Website không gửi email, không hiển thị lại mật khẩu sau khi tạo và chưa bắt buộc đổi mật khẩu lần đầu.
+Sinh viên tự giữ mật khẩu đã đặt và có thể đổi tại **Tài khoản → Đổi mật khẩu**. Website không gửi email tự động hoặc hiển thị lại mật khẩu sau đăng ký.
 
 Để khóa/mở khóa, chọn sinh viên trong danh sách, nhập lý do rồi xác nhận. Thao tác được ghi vào `AuditLogs`; khóa chặn yêu cầu tiếp theo của phiên đang có. Mở khóa yêu cầu đăng nhập mới, không tự xóa thời hạn tạm khóa do nhập sai mật khẩu. Chức năng này không thao tác tài khoản Admin và không xóa hồ sơ/lịch sử thành viên. Xem [hướng dẫn và nghiệm thu PB02](docs/student-accounts.md).
 
@@ -125,7 +127,7 @@ Máy đã có bản bước 4 cần build lại và chạy `dotnet ef database u
 
 ## Quản lý câu lạc bộ và chủ nhiệm
 
-Admin vào **Quản trị → Quản lý câu lạc bộ → Tạo câu lạc bộ**. Nhập mã CLB, tên và mã sinh viên chủ nhiệm; lĩnh vực/giới thiệu tùy chọn. Cần cấp tài khoản sinh viên đang hoạt động trước. Tạo CLB, tư cách thành viên của chủ nhiệm đầu tiên và nhật ký trong cùng giao dịch. Mã CLB giữ cố định sau khi tạo.
+Admin vào **Quản trị → Quản lý câu lạc bộ → Tạo câu lạc bộ**. Nhập mã CLB, tên và mã sinh viên chủ nhiệm; lĩnh vực/giới thiệu tùy chọn. Người làm chủ nhiệm phải có tài khoản sinh viên đã được duyệt và đang hoạt động. Tạo CLB, tư cách thành viên của chủ nhiệm đầu tiên và nhật ký trong cùng giao dịch. Mã CLB giữ cố định sau khi tạo.
 
 Chủ nhiệm đăng nhập → **CLB tôi quản lý** → **Sửa thông tin**. Chỉ sửa tên, lĩnh vực, giới thiệu của CLB mình phụ trách. Admin sửa được các CLB trong hệ thống. Form cũ sau chỉnh sửa/chuyển giao yêu cầu tải lại; chủ nhiệm cũ mất quyền ngay ở request tiếp theo.
 
@@ -139,7 +141,7 @@ Khởi động lại ứng dụng sau khi cập nhật mã nguồn, chọn **Câ
 
 Chọn **Xem chi tiết** để đọc giới thiệu đầy đủ. CLB Active và Suspended xuất hiện với nhãn trạng thái; Archived không xuất hiện và đường dẫn chi tiết trả 404. Mã, tên, lĩnh vực, giới thiệu và trạng thái là thông tin công khai. Danh sách thành viên và thông tin tài khoản không được đưa vào các trang này; form sửa CLB nhắc người quản lý về phạm vi nội dung công khai.
 
-Nếu database ứng dụng chưa có CLB thì danh mục trống là đúng. Admin cần cấp tài khoản sinh viên rồi tạo CLB và chủ nhiệm bằng chức năng bước 6. Ảnh kiểm tra dùng dữ liệu giả trong database QA riêng, đã dọn sau kiểm tra. Bước 7 không thêm migration và chưa có đăng ký gia nhập. Xem [quy tắc và nghiệm thu PB04](docs/public-clubs.md).
+Nếu database ứng dụng chưa có CLB thì danh mục trống là đúng. Sinh viên gửi đơn thành lập CLB để Admin duyệt; Admin cũng có thể tạo CLB trực tiếp cho sinh viên đã được duyệt. Ảnh kiểm tra dùng dữ liệu giả trong database QA riêng, đã dọn sau kiểm tra. Bước 7 không thêm migration và chưa có đăng ký gia nhập. Xem [quy tắc và nghiệm thu PB04](docs/public-clubs.md).
 
 ## Kiểm tra nhanh
 
@@ -165,17 +167,23 @@ Bộ kiểm thử tạo database riêng `StudentClubManagement_Tests_<guid>` và
 
 ## Cấu trúc hiện tại
 
+Database có mười hai bảng chính: Users, Roles, Clubs, Memberships, JoinRequests, ClubProposals, AuditLogs, Events, EventRegistrations, Attendances, Announcements, AnnouncementRecipients; EF giữ thêm __EFMigrationsHistory. Attendances có 6 cột, dùng RegistrationId làm khóa chính kiêm khóa ngoại. Announcements có 10 cột, gồm SourceKey chống tạo trùng thông báo tự động. AnnouncementRecipients có 3 cột: hai khóa liên kết và ReadAt lưu thời điểm đọc đầu tiên. Đăng nhập/phân quyền vẫn chỉ có hai bảng Users và Roles. [Giải thích SQL hiện tại](docs/simple-database.md). Migration StreamlineAccountsAndClubProposals chuyển quyền sang Users.RoleId trước khi xóa UserRoles; giữ tài khoản và mật khẩu cũ. Sao lưu trước khi chạy migration, không tự xóa bảng trong SSMS.
+
 ```text
 StudentClubManagement.sln
 src/StudentClubManagement.Web/
   Controllers/HomeController.cs
   Controllers/AccountController.cs
   Controllers/ClubsController.cs         # Danh mục/chi tiết công khai
+  Controllers/JoinRequestsController.cs  # Sinh viên gửi, xem và rút đơn của mình
+  Controllers/JoinRequestReviewController.cs # Chủ nhiệm/Admin xét duyệt đơn
+  Controllers/MembershipsController.cs   # Danh sách, trạng thái, lịch sử và tự rời CLB
   Controllers/ClubManagementController.cs # CLB tôi quản lý và sửa hồ sơ
   Areas/Admin/            # Dashboard, tài khoản sinh viên, tạo CLB/chuyển chủ nhiệm
   ViewModels/Account/
   ViewModels/Clubs/
-  Models/                 # ApplicationUser, Club, Membership, AuditLog
+  Controllers/EventsController.cs # Nháp, công bố, cập nhật, hủy/hoàn thành hoạt động
+  Models/                 # ApplicationUser, Club, Membership, JoinRequest, ClubEvent, AuditLog
   Data/                   # DbContext, Fluent configuration, Migrations
   Security/               # Role hệ thống, cấu hình Identity
   Services/               # Giao dịch tạo user/role/audit và thay đổi trạng thái
@@ -190,6 +198,11 @@ docs/student-accounts.md
 docs/club-management.md
 docs/public-clubs.md
 docs/personal-profile.md
+docs/join-requests.md
+docs/join-request-review.md
+docs/memberships.md
+docs/events.md
+docs/activity-calendar.md
 docs/implementation-log.md
 scripts/                  # Chuẩn bị/xem thông tin quản trị cục bộ
 output/Phan_tich_CLB_Agile_Scrum.md
@@ -207,4 +220,40 @@ Controller nhận request và chọn View; ViewModel chỉ chứa dữ liệu c�
 
 ## Bước tiếp theo
 
-PB06 đã triển khai và kiểm thử cục bộ, chờ nhóm review/nhóm trưởng nghiệm thu theo `docs/personal-profile.md`. Bước triển khai tiếp theo dự kiến PB07: gửi, rút và theo dõi đơn gia nhập; sau đó PB08 duyệt đơn/tạo thành viên. Trước khi chốt Sprint 1 cần review phần đã làm và cập nhật việc PB05 tạm dừng/lưu trữ còn phụ thuộc đơn chờ/hoạt động. Chưa đánh dấu toàn bộ PB05 hoặc Sprint 1 Done.
+PB11–PB18 đã có lịch, đăng ký/hủy, tra cứu lịch sử, điểm danh/chốt, đăng thông báo, hộp thông báo cá nhân và thông báo tự động đổi lịch/hủy. Sinh viên xem kết quả điểm danh tại **Hoạt động đã đăng ký → Kết quả điểm danh**, xem thông báo tại **Thông báo** trên menu. Xem [hướng dẫn PB15](docs/attendance-finalization.md), [PB16](docs/announcements.md), [PB17](docs/notification-inbox.md) và [PB18](docs/event-change-notifications.md). Bước kế tiếp là **PB19: thống kê CLB và thành viên hiện tại**.
+
+PB10 đã có tạo nháp, công bố, sửa trước giờ bắt đầu, hủy có lý do và hoàn thành sau giờ kết thúc; xem [hướng dẫn code, SQL và sử dụng hoạt động](docs/events.md). PB12 đã tích hợp kiểm tra sức chứa theo số đăng ký; PB18 đã tích hợp snapshot/thông báo thay đổi cùng giao dịch. Cần nhóm review/nghiệm thu các phần đã triển khai trước khi đánh dấu Done.
+
+PB09 đã triển khai danh sách, tìm kiếm/lọc, đình chỉ/khôi phục/kết thúc, tự rời và lịch sử trạng thái; xem [hướng dẫn thành viên](docs/memberships.md). PB12 đã tích hợp xử lý đăng ký nội bộ tương lai. Các phần đã triển khai cần nhóm nghiệm thu theo hướng dẫn tương ứng. Trước khi chốt Sprint 1 cần review phần đã làm và cập nhật việc PB05 tạm dừng/lưu trữ còn phụ thuộc đơn chờ/hoạt động. Chưa đánh dấu toàn bộ PB05 hoặc Sprint 1 Done.
+
+## Đăng ký tham gia hoạt động — PB12
+
+Sinh viên: **Lịch hoạt động → chọn hoạt động → Đăng ký tham gia**. Quản lý đăng ký tại **Tài khoản → Hoạt động đã đăng ký**. Admin/chủ nhiệm xem **Chi tiết hoạt động → Danh sách đăng ký**. Kiểm tra hạn, sức chứa và quyền nội bộ ở server; hủy trả lại chỗ và giữ lịch sử. Xem [hướng dẫn, SQL và nghiệm thu PB12](docs/event-registrations.md). Migration mới: 20261110043425_AddEventRegistrations.
+
+PB13 bổ sung bộ lọc cho hai danh sách và **Lịch sử đăng ký** trên từng thẻ cá nhân. Không thêm bảng/cột hoặc migration. Xem [thao tác, code MVC/SQL và nghiệm thu PB13](docs/registration-history.md).
+
+## Điểm danh hoạt động — PB14
+
+Admin/chủ nhiệm mở **Chi tiết hoạt động → Điểm danh**. Từ giờ bắt đầu có thể ghi Có mặt/Vắng/Có phép, trước chốt có thể đưa về Chưa điểm danh. Tìm tên/mã SV và lọc kết quả. Người chưa được ghi không tự coi là vắng. Lưu người thực hiện, thời gian và nhật ký cùng giao dịch. Xem [quy tắc, MVC/SQL và nghiệm thu](docs/attendance.md). PB14 dùng migration **20261110103415_AddAttendances**.
+
+PB15 thêm **Chốt danh sách điểm danh** sau giờ kết thúc: cần xử lý hết Unmarked hoặc xác nhận chuyển sang Vắng; sau chốt cố định danh sách và bắt buộc lý do khi sửa kết quả. Xem [hướng dẫn chốt và kết quả cá nhân](docs/attendance-finalization.md). Migration PB15: **20261110120624_FinalizeAttendance**; không thêm bảng.
+
+## Thông báo theo đối tượng — PB16
+
+Admin chọn **Quản lý thông báo** ở menu trái; chủ nhiệm chọn **CLB tôi quản lý → Thông báo**. Soạn nháp cho thành viên CLB hoặc người đăng ký hoạt động, xem trước số người nhận rồi đăng. Hệ thống giữ tập người nhận tại thời điểm đăng, chống bấm trùng và lưu audit. Nội dung đã đăng không sửa; đính chính bằng thông báo mới. Lưu trữ cần lý do và vẫn giữ quyền đọc của người đã nhận.
+
+Migration PB16: **20261110151453_AddAnnouncements**, thêm Announcements (9 cột) và AnnouncementRecipients (ban đầu 2 cột, PB17 bổ sung ReadAt). Không sửa dữ liệu các bảng cũ. Đã sao lưu/kiểm tra bản sao lưu và áp dụng trên máy hiện tại. Máy khác áp dụng migration theo phần thiết lập.
+
+Xem [hướng dẫn thao tác, code MVC, SQL và nghiệm thu PB16](docs/announcements.md). Không gửi email hoặc tự động thông báo đổi lịch/hủy ở PB16.
+
+## Hộp thông báo và đã đọc — PB17
+
+Sinh viên/chủ nhiệm chọn **Thông báo** trên menu hoặc **Tài khoản → Thông báo của tôi**. Tìm tiêu đề, lọc CLB, lọc Đã đọc/Chưa đọc. Bấm **Xem thông báo** chỉ mở nội dung; chọn **Đánh dấu đã đọc** để xác nhận. Số chưa đọc giảm sau thao tác/tải lại; bấm lặp giữ thời điểm đầu tiên. Thông báo đã nhận vẫn tồn tại sau khi rời CLB, hủy đăng ký hoặc lưu trữ.
+
+Admin/chủ nhiệm quản lý xem **Chi tiết thông báo → Xem người nhận** để đối chiếu số đã đọc. Không được đánh dấu thay người khác. Migration PB17: **20261111011414_AddAnnouncementReadAt**, chỉ thêm cột ReadAt, không thêm bảng. Hướng dẫn sử dụng, quyền và SQL: [PB17](docs/notification-inbox.md). Khởi động lại Web sau cập nhật.
+
+## Thông báo tự động đổi lịch/hủy — PB18
+
+Admin/chủ nhiệm sửa giờ bắt đầu, kết thúc, hạn đăng ký hoặc địa điểm của hoạt động đã công bố → nhập lý do → lưu. Người còn đăng ký nhận một thông báo gồm thay đổi trước/sau và lý do. Khi hủy, hệ thống giữ danh sách người nhận trước khi hủy đăng ký; gửi lại form cũ không tạo trùng thông báo. Sinh viên đọc tại **Thông báo**. Quản lý xem **Thông báo tự động gần nhất** ở chi tiết hoạt động.
+
+Migration mới nhất: **20261111013356_AddEventNoticeSource**, chỉ thêm SourceKey vào Announcements và các ràng buộc. Vẫn 12 bảng; không sửa Users/Roles. Không gửi email/push. Xem [hướng dẫn thao tác, code và SQL PB18](docs/event-change-notifications.md).

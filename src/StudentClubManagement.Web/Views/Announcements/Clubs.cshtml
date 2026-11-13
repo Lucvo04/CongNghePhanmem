@@ -1,0 +1,15 @@
+@model IReadOnlyList<StudentClubManagement.Web.Models.Club>
+@{ ViewData["Title"] = "Quản lý thông báo"; }
+<section class="container py-5">
+    <p class="eyebrow">Kết nối cộng đồng</p><h1 class="h2">Quản lý thông báo</h1>
+    <p class="text-secondary mb-4">Chọn câu lạc bộ để soạn và đăng thông báo đến đúng người nhận.</p>
+    <div class="row g-3">
+        @foreach (var club in Model)
+        {
+            <div class="col-md-6 col-xl-4"><article class="card community-card p-4 h-100">
+                <p class="small text-secondary text-break">@club.Code</p><h2 class="h5 text-break">@club.Name</h2>
+                <a class="btn btn-outline-primary mt-auto" asp-action="Index" asp-route-clubId="@club.Id">Quản lý thông báo</a>
+            </article></div>
+        }
+    </div>
+</section>

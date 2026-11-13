@@ -1,0 +1,42 @@
+@model StudentClubManagement.Web.ViewModels.Memberships.ChangeMemberStatusViewModel
+@{ ViewData["Title"] = Model.SelfLeave ? "Rời câu lạc bộ" : "Thay đổi trạng thái thành viên"; var item = Model.Member; var action = Model.SelfLeave ? "Leave" : "ChangeStatus"; }
+<section class="container py-5">
+    <a asp-action="Details" asp-route-id="@item.Id">← Chi tiết thành viên</a>
+    <div class="account-details mt-4">
+        <p class="eyebrow">@item.ClubName</p><h1 class="h2">@ViewData["Title"]</h1>
+        <div class="card community-card p-4 p-md-5 mt-4">
+            <h2 class="h5 text-break">@item.FullName</h2><p>Hiện tại: @item.Status.Label()</p>
+            <div asp-validation-summary="All" class="text-danger validation-summary" role="alert"></div>
+            @if (item.ClubStatus == ClubStatus.Archived || item.Status == MembershipStatus.Left || item.Role == ClubRole.Manager)
+            {
+                <p>@(item.Role == ClubRole.Manager && item.EndedAt is null ? "Cần chuyển chủ nhiệm trước khi thay đổi trạng thái." : "Đợt tham gia đã kết thúc hoặc CLB đã lưu trữ. Chỉ có thể xem lịch sử.")</p>
+            }
+            else
+            {
+                <form asp-action="@action" asp-route-id="@item.Id" method="post">
+                    <input asp-for="RowVersion" type="hidden" />
+                    @if (Model.SelfLeave)
+                    {
+                        <p>Bạn sẽ kết thúc đợt tham gia hiện tại. Lịch sử được giữ lại; muốn gia nhập lại cần gửi đơn mới.</p>
+                        <p>Cần hủy đăng ký hoạt động nội bộ chưa diễn ra trước khi rời CLB. <a asp-controller="EventRegistrations" asp-action="Mine">Xem hoạt động đã đăng ký</a>.</p>
+                    }
+                    else
+                    {
+                        <label asp-for="NewStatus" class="form-label fw-semibold">Trạng thái mới</label><select asp-for="NewStatus" class="form-select mb-3">
+                            <option value="0">Chọn trạng thái</option>
+                            @if (item.Status == MembershipStatus.Active) { <option value="2">Tạm đình chỉ</option> }
+                            @if (item.Status == MembershipStatus.Suspended && item.ClubStatus == ClubStatus.Active) { <option value="1">Khôi phục hoạt động</option> }
+                            <option value="3">Kết thúc tư cách thành viên</option>
+                        </select>
+                        <p class="small text-secondary">Đình chỉ giữ đợt tham gia để có thể khôi phục. Kết thúc tư cách thành viên cần đơn mới nếu muốn gia nhập lại. Đây là trạng thái trong CLB, không phải khóa tài khoản đăng nhập.</p>
+                        <p class="small text-secondary">Đình chỉ hoặc kết thúc sẽ hủy các đăng ký hoạt động nội bộ chưa bắt đầu của thành viên. Đăng ký toàn trường và lịch sử đã diễn ra được giữ nguyên.</p>
+                    }
+                    <label asp-for="Reason" class="form-label fw-semibold"></label><textarea asp-for="Reason" rows="4" maxlength="500" class="form-control" aria-describedby="reason-help"></textarea>
+                    <p id="reason-help" class="small text-secondary mt-2">Bắt buộc, tối đa 500 ký tự. Thành viên sẽ xem được lý do trong lịch sử của mình.</p>
+                    <div class="d-flex flex-wrap gap-2 mt-4"><button class="btn @(Model.SelfLeave ? "btn-danger" : "btn-primary")" type="submit">@(Model.SelfLeave ? "Xác nhận rời CLB" : "Xác nhận thay đổi")</button><a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id">Hủy</a><a class="btn btn-link" asp-action="@action" asp-route-id="@item.Id">Tải lại</a></div>
+                </form>
+            }
+        </div>
+    </div>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

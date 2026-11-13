@@ -1,0 +1,40 @@
+@model StudentClubManagement.Web.ViewModels.JoinRequests.ReviewJoinRequestViewModel
+@{ ViewData["Title"] = "Xử lý đơn gia nhập"; var item = Model.Request; }
+<section class="container py-5">
+    <a asp-action="Index" asp-route-clubId="@item.ClubId">← Danh sách đơn gia nhập</a>
+    <div class="account-details mt-4">
+        <p class="eyebrow">@item.ClubName</p><h1 class="h2">Xử lý đơn gia nhập</h1>
+        <div class="card community-card p-4 p-md-5 mt-4">
+            <h2 class="h4 text-break">@item.StudentName</h2><p class="text-secondary">Mã sinh viên: @(item.StudentCode ?? "Chưa cập nhật")</p>
+            <p><strong>Trạng thái:</strong> @item.Status.Label()</p>
+            <p class="small text-secondary">Gửi lúc @item.SubmittedAt.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy · HH:mm")</p>
+            <h3 class="h6">Lý do muốn tham gia</h3><p class="club-description text-break">@item.Reason</p>
+            <div asp-validation-summary="All" class="text-danger validation-summary" role="alert"></div>
+            @if (item.Status == JoinRequestStatus.Pending && item.ClubStatus != ClubStatus.Archived)
+            {
+                <form asp-action="Decide" asp-route-id="@item.Id" method="post" class="mt-3">
+                    <input asp-for="RowVersion" type="hidden" />
+                    <label asp-for="Decision" class="form-label fw-semibold">Quyết định</label>
+                    <select asp-for="Decision" class="form-select mb-3">
+                        <option value="0">Chọn quyết định</option>
+                        @if (item.ClubStatus == ClubStatus.Active) { <option value="3">Chấp nhận — thêm làm thành viên</option> }
+                        <option value="4">Từ chối</option>
+                    </select>
+                    <label asp-for="DecisionReason" class="form-label fw-semibold"></label>
+                    <textarea asp-for="DecisionReason" rows="4" maxlength="500" class="form-control" aria-describedby="decision-help"></textarea>
+                    <p id="decision-help" class="small text-secondary mt-2">Bắt buộc khi từ chối, tối đa 500 ký tự. Sinh viên sẽ xem được lý do này. Khi chấp nhận, trường này không được lưu.</p>
+                    <p class="small">Xác nhận sẽ lưu quyết định. Chấp nhận tạo thành viên hoạt động; đơn đã xử lý không thể quyết định lại.</p>
+                    <div class="d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">Xác nhận quyết định</button><a class="btn btn-outline-secondary" asp-action="Index" asp-route-clubId="@item.ClubId">Quay lại</a><a class="btn btn-link" asp-action="Decide" asp-route-id="@item.Id">Tải lại</a></div>
+                </form>
+            }
+            else
+            {
+                @if (item.DecidedByName is not null) { <p><strong>Người xử lý:</strong> @item.DecidedByName</p> }
+                @if (item.ClosedAt is DateTimeOffset closed) { <p>Xử lý lúc @closed.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy · HH:mm")</p> }
+                @if (item.DecisionReason is not null) { <p class="club-description text-break"><strong>Lý do từ chối:</strong> @item.DecisionReason</p> }
+                <p class="text-secondary">Đơn đã kết thúc hoặc CLB đã lưu trữ. Không thể thay đổi quyết định.</p>
+            }
+        </div>
+    </div>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

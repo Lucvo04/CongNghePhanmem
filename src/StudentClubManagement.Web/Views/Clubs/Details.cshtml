@@ -26,11 +26,22 @@
                 {
                     <p class="mb-0">CLB hiện tạm dừng hoạt động và không tiếp nhận đăng ký mới. Bạn có thể khám phá các CLB khác trong danh mục.</p>
                 }
+                else if (User.Identity?.IsAuthenticated != true)
+                {
+                    <p>Đăng nhập bằng tài khoản sinh viên để gửi đơn gia nhập CLB.</p>
+                    <a class="btn btn-primary" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Create", "JoinRequests", new { clubId = Model.Id })">Đăng nhập để đăng ký</a>
+                }
+                else if (User.IsInRole(StudentClubManagement.Web.Security.SystemRoles.Student) && !User.IsInRole(StudentClubManagement.Web.Security.SystemRoles.Admin))
+                {
+                    <p>Chia sẻ lý do muốn tham gia và theo dõi đơn trong mục Đơn của tôi.</p>
+                    <a class="btn btn-primary" asp-controller="JoinRequests" asp-action="Create" asp-route-clubId="@Model.Id">Đăng ký gia nhập</a>
+                }
                 else
                 {
-                    <p class="mb-0">Chức năng đăng ký gia nhập trực tuyến đang được chuẩn bị. Hiện tại, bạn có thể xem thông tin và tìm CLB phù hợp với sở thích.</p>
+                    <p class="mb-0">Đơn gia nhập dành cho tài khoản sinh viên. Bạn đang xem bằng tài khoản quản trị hoặc tài khoản chưa có quyền sinh viên.</p>
                 }
-                <a class="btn btn-primary mt-4" asp-area="" asp-controller="Clubs" asp-action="Index">Khám phá CLB khác</a>
+                <a class="btn btn-outline-primary mt-3" asp-area="" asp-controller="Events" asp-action="Calendar" asp-route-ClubId="@Model.Id">Lịch hoạt động của CLB</a>
+                <a class="btn btn-outline-secondary mt-3" asp-area="" asp-controller="Clubs" asp-action="Index">Khám phá CLB khác</a>
             </aside>
         </div>
     </div>
